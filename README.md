@@ -17,7 +17,6 @@ Windows Vista以降のタスクダイアログを.Netから利用することが
 ### サンプル
 
 ```cs
-
 var taskDialogPage = new TaskDialogPage
 {
     WindowTitle = "Samples",
