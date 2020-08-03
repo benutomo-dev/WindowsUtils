@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2003
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskDialog", "TaskDialog\TaskDialog.csproj", "{538DB590-B474-45F2-B752-1E200538B4EE}"
 EndProject
@@ -14,6 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectInfos", "ProjectInfo
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncHelper", "AsyncHelper\AsyncHelper.csproj", "{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncHelperSample", "AsyncHelperSample\AsyncHelperSample.csproj", "{5D348716-C767-4874-8750-970B1A974AB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncHelper.Forms", "AsyncHelper.Forms\AsyncHelper.Forms.csproj", "{91690D82-AFF5-4CC3-9927-24359E3E1EDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D348716-C767-4874-8750-970B1A974AB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D348716-C767-4874-8750-970B1A974AB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D348716-C767-4874-8750-970B1A974AB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D348716-C767-4874-8750-970B1A974AB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91690D82-AFF5-4CC3-9927-24359E3E1EDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91690D82-AFF5-4CC3-9927-24359E3E1EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91690D82-AFF5-4CC3-9927-24359E3E1EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91690D82-AFF5-4CC3-9927-24359E3E1EDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
