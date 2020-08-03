@@ -5,6 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
+    <RootNamespace>WindowsControls.Aysnc.Forms</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

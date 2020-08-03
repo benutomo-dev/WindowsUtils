@@ -1,5 +1,4 @@
-﻿using AsyncHelper.Forms;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsControls;
 using WindowsControls.Aysnc;
+using WindowsControls.Aysnc.Forms;
 
 namespace ModalAsyncDelegatesSample
 {
@@ -31,6 +31,8 @@ namespace ModalAsyncDelegatesSample
 
             normalDoDelayActionButton.RemoveBindingExclusiveExecutionMachine(Label2AffecredInvocation);
             normalDoDelayActionButton.RemoveBindingExclusiveExecutionMachine(Label1AffecredInvocation);
+
+            panel1.AddBindingExclusiveExecutionMachines(Label1AffecredInvocation, Label2AffecredInvocation);
         }
 
         private async void normalDoDelayActionButton_Click(object sender, EventArgs e)

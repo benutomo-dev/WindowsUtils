@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
 using System.Windows.Forms;
-using WindowsControls.Aysnc;
 
-namespace AsyncHelper.Forms
+namespace WindowsControls.Aysnc.Forms
 {
     public static class ExclusiveExecutionMachineBinding
     {
