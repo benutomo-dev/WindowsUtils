@@ -8,9 +8,11 @@
     <Authors>benutomo</Authors>
     <Company />
     <Product />
-    <Copyright>Copyright © 2019 benutomo</Copyright>
+    <Copyright>Copyright © 2020 benutomo</Copyright>
     <Description>The TaskDialog is wrapper of native Task Dialog of Windows7 or grater.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
