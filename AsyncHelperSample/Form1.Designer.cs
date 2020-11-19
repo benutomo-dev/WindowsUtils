@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.normalDoDelayActionButton = new System.Windows.Forms.Button();
             this.modalDoDelayActionButton = new System.Windows.Forms.Button();
             this.statusLabel1 = new System.Windows.Forms.Label();

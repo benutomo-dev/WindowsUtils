@@ -207,7 +207,7 @@ namespace WindowsControls.Aysnc
                         }
                         else if (removeIndex == previousObservers.Length - 1)
                         {
-                            Array.Copy(previousObservers, 0, nextObservers, 1, previousObservers.Length - 1);
+                            Array.Copy(previousObservers, 0, nextObservers, 0, previousObservers.Length - 1);
                         }
                         else
                         {

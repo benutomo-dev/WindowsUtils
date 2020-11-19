@@ -18,8 +18,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncHelper", "AsyncHelper\AsyncHelper.csproj", "{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncHelperSample", "AsyncHelperSample\AsyncHelperSample.csproj", "{5D348716-C767-4874-8750-970B1A974AB2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91690D82-AFF5-4CC3-9927-24359E3E1EDA} = {91690D82-AFF5-4CC3-9927-24359E3E1EDA}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncHelper.Forms", "AsyncHelper.Forms\AsyncHelper.Forms.csproj", "{91690D82-AFF5-4CC3-9927-24359E3E1EDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncHelper.Forms", "AsyncHelper.Forms\AsyncHelper.Forms.csproj", "{91690D82-AFF5-4CC3-9927-24359E3E1EDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

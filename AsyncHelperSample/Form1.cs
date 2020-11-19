@@ -35,6 +35,20 @@ namespace ModalAsyncDelegatesSample
             panel1.AddBindingExclusiveExecutionMachines(Label1AffecredInvocation, Label2AffecredInvocation);
         }
 
+
+        const int WM_SETCURSOR = 0x0020;
+        protected override void DefWndProc(ref Message m)
+        {
+            if (m.Msg == WM_SETCURSOR && m.WParam == Handle && ModalExecutionBlock.IsEnteredAnyone)
+            {
+                Cursor.Current = Cursors.WaitCursor;
+            }
+            else
+            {
+                base.DefWndProc(ref m);
+            }
+        }
+
         private async void normalDoDelayActionButton_Click(object sender, EventArgs e)
         {
             await Task.WhenAll(Label1DelayActionCoreAsync(), Label2DelayActionCoreAsync());
@@ -42,7 +56,7 @@ namespace ModalAsyncDelegatesSample
 
         private async void modalDoDelayActionButton_Click(object sender, EventArgs e)
         {
-            using (ModalExecutionBlock.Enter())
+            using (ModalExecutionBlock.Default.Enter())
             {
                 await Task.WhenAll(Label1DelayActionCoreAsync(), Label2DelayActionCoreAsync());
             }

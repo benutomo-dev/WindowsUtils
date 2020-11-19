@@ -32,6 +32,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncHelper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\AsyncHelper.Forms\bin\$(Configuration)\net45\AsyncHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="AsyncHelper.Forms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\AsyncHelper.Forms\bin\$(Configuration)\net45\AsyncHelper.Forms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -79,14 +87,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AsyncHelper.Forms\AsyncHelper.Forms.csproj">
-      <Project>{91690d82-aff5-4cc3-9927-24359e3e1eda}</Project>
-      <Name>AsyncHelper.Forms</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AsyncHelper\AsyncHelper.csproj">
-      <Project>{99f8047c-9d1b-4310-bf7a-a976db2f0b47}</Project>
-      <Name>AsyncHelper</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TaskDialog\TaskDialog.csproj">
       <Project>{538db590-b474-45f2-b752-1e200538b4ee}</Project>
       <Name>TaskDialog</Name>
