@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskDialog", "TaskDialog\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskDialogSample", "TaskDialogSample\TaskDialogSample.csproj", "{79433054-0529-4B6F-8B62-363001DAE5F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StokIcons", "StokIcons\StokIcons.csproj", "{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockIcons", "StockIcons\StockIcons.csproj", "{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectInfos", "ProjectInfos", "{3A1BE056-B116-4DF7-B25F-8B31553E1D23}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,7 +28,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gdi32Fonts", "Gdi32Fonts\Gd
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gdi32Fonts.Forms", "Gdi32Fonts.Forms\Gdi32Fonts.Forms.csproj", "{F1C05BC5-A30E-478C-AA9F-C26418329426}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gdi32FontsSample", "Gdi32FontsSample\Gdi32FontsSample.csproj", "{EE6E7C85-6089-418A-B518-9B5AB424C09A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gdi32FontsSample", "Gdi32FontsSample\Gdi32FontsSample.csproj", "{EE6E7C85-6089-418A-B518-9B5AB424C09A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

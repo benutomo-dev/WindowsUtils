@@ -1,4 +1,4 @@
-﻿namespace ModalAsyncDelegatesSample
+﻿namespace AsyncHelperSample
 {
     partial class Form1
     {

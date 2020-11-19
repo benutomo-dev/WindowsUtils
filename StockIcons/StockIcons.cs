@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WindowsControls
 {
-    public static class StokIcons
+    public static class StockIcons
     {
         public static Icon DocNoAssocLarge => new Lazy<Icon>(() => Load(SHSTOCKICONID.SIID_DOCNOASSOC, SHGSI.SHGSI_LARGEICON)).Value;
         public static Icon DocAssocLarge => new Lazy<Icon>(() => Load(SHSTOCKICONID.SIID_DOCASSOC, SHGSI.SHGSI_LARGEICON)).Value;

@@ -11,7 +11,12 @@ using WindowsControls;
 using WindowsControls.Aysnc;
 using WindowsControls.Aysnc.Forms;
 
-namespace ModalAsyncDelegatesSample
+using TaskDialog = WindowsControls.TaskDialog;
+using TaskDialogIcon = WindowsControls.TaskDialogIcon;
+using TaskDialogPage = WindowsControls.TaskDialogPage;
+using TaskDialogProgressBarState = WindowsControls.TaskDialogProgressBarState;
+
+namespace AsyncHelperSample
 {
     public partial class Form1 : Form
     {

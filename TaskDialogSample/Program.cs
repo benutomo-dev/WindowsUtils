@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsControls;
 
+using TaskDialog = WindowsControls.TaskDialog;
+using TaskDialogIcon = WindowsControls.TaskDialogIcon;
+using TaskDialogPage = WindowsControls.TaskDialogPage;
+using TaskDialogProgressBarState = WindowsControls.TaskDialogProgressBarState;
+
 namespace TaskDialogSample
 {
     class Program
@@ -32,7 +37,7 @@ namespace TaskDialogSample
                 WindowTitle = "Samples",
                 MainInstructionText = "Select sample",
                 TaskButtonStyle = TaskDialogTaskButtonStyle.CommandLink,
-                MainIcon = TaskDialogIcon.FromHIcon(StokIcons.UsersLarge.Handle),
+                MainIcon = TaskDialogIcon.FromHIcon(StockIcons.UsersLarge.Handle),
                 ProgressBar = TaskDialogProgressBarType.Marquee,
             };
 
@@ -187,8 +192,8 @@ namespace TaskDialogSample
                 await modelessTaskDialog.ShowAsync();
             };
 
-            var large = StokIcons.ErrorLarge;
-            var small = StokIcons.ErrorSmall;
+            var large = StockIcons.ErrorLarge;
+            var small = StockIcons.ErrorSmall;
 
 
             TaskDialogProgressBarState barState = TaskDialogProgressBarState.Normal;
