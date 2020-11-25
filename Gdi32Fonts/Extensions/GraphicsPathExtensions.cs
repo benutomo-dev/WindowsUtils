@@ -42,13 +42,18 @@ namespace System.Drawing.Drawing2D
 
             var outline = font.GetOutline(text, OutlineMode.Bezier);
 
+            if (outline is null)
+            {
+                return new RectangleF(origin, SizeF.Empty);
+            }
+
             return AddWindowsFontOutline(graphicsPath, outline, size, origin, enableHorizontalCenteringMode);
         }
 
 
         public static RectangleF AddWindowsFontOutline(this GraphicsPath graphicsPath, FontOutline outline, float size, PointF origin, bool enableHorizontalCenteringMode)
         {
-            if (outline == null || outline.Polygons.Length == 0)
+            if (outline is null || outline.Polygons.Length == 0)
             {
                 return new RectangleF(origin, SizeF.Empty);
             }

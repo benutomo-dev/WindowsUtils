@@ -13,13 +13,10 @@ namespace Gdi32Fonts
     {
         static ConcurrentDictionary<IntPtr, Gdi32Context> ActiveInstances = new ConcurrentDictionary<IntPtr, Gdi32Context>();
 
-        Graphics DeviceContext { get; set; }
+        Graphics? DeviceContext { get; set; }
         IntPtr HDC { get; set; }
 
-        FontSafeHandle SelectedFont { get; set; }
-
-
-        private Gdi32Context(Graphics graphics, IntPtr hDC)
+        private Gdi32Context(Graphics? graphics, IntPtr hDC)
         {
             if (!ActiveInstances.TryAdd(hDC, this))
             {
@@ -44,16 +41,16 @@ namespace Gdi32Fonts
             {
                 if (preserveClipping || preserveTranslateTransform)
                 {
-                    Region region = null;
-                    Matrix matrix = null;
-                    WindowsRegion windowsRegion = null;
+                    Region? region = null;
+                    Matrix? matrix = null;
+                    WindowsRegion? windowsRegion = null;
 
                     if (graphics.GetContextInfo() is object[] contextInfo && contextInfo.Length == 2)
                     {
                         region = (contextInfo[0] as Region);
                         matrix = (contextInfo[1] as Matrix);
 
-                        if (region != null)
+                        if (region is { })
                         {
                             windowsRegion = WindowsRegion.FromRegion(region, graphics);
                         }
@@ -65,7 +62,7 @@ namespace Gdi32Fonts
                     try
                     {
 
-                        if (preserveClipping && windowsRegion != null)
+                        if (preserveClipping && windowsRegion is { })
                         {
                             using (var existsRegion = new WindowsRegion(0, 0, 0, 0))
                             {
@@ -79,7 +76,7 @@ namespace Gdi32Fonts
                             }
                         }
 
-                        if (preserveTranslateTransform && matrix != null)
+                        if (preserveTranslateTransform && matrix is { })
                         {
                             var matrixElements = matrix.Elements;
 

@@ -113,11 +113,14 @@ namespace Gdi32FontsSample
 
                 var outline = font.GetOutline(text, OutlineMode.Native);
 
-                var enableHorizontalCenteringMode = true;
+                if (outline is { })
+                {
+                    var enableHorizontalCenteringMode = true;
 
-                htmlBuilder.AppendLine(@$"<path style=""fill:black; stroke:red; stroke-width:3"" d=""{outline.ToSvgPathData(size, origin, enableHorizontalCenteringMode)}"" />");
+                    htmlBuilder.AppendLine(@$"<path style=""fill:black; stroke:red; stroke-width:3"" d=""{outline.ToSvgPathData(size, origin, enableHorizontalCenteringMode)}"" />");
 
-                RenderControlPoints(text, size, origin, font, htmlBuilder);
+                    RenderControlPoints(text, size, origin, font, htmlBuilder);
+                }
 
                 htmlBuilder.AppendLine("</svg>");
             }
@@ -125,6 +128,11 @@ namespace Gdi32FontsSample
             static void RenderControlPoints(string text, int size, PointF origin, Gdi32Font font, StringBuilder htmlBuilder)
             {
                 var outline = font.GetOutline(text, OutlineMode.Native);
+
+                if (outline is null)
+                {
+                    return;
+                }
 
                 var enableHorizontalCenteringMode = true;
 

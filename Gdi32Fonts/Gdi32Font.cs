@@ -46,11 +46,21 @@ namespace Gdi32Fonts
         private static Dictionary<FontCacheKey, SharedObject> FontCache = new Dictionary<FontCacheKey, SharedObject>();
 
         FontCacheKey Key { get; }
-        SharedObject SharedFont { get; set; }
 
-        internal FontSafeHandle Handle => SharedFont?.Handle;
+        SharedObject? _SharedFont;
+        SharedObject SharedFont
+        {
+            get
+            {
+                var sharedFont = _SharedFont;
+                if (sharedFont is null) throw new ObjectDisposedException(nameof(Gdi32Font));
+                return sharedFont;
+            }
+        }
 
-        internal FontSafeHandle.LOGFONT Logfont => SharedFont?.Logfont;
+        internal FontSafeHandle Handle => SharedFont.Handle;
+
+        internal readonly FontSafeHandle.LOGFONT Logfont;
 
         public float SizeInPixels => Logfont.lfHeight < 0 ? -Logfont.lfHeight : Logfont.lfHeight * 96f / 72f;
 
@@ -89,8 +99,10 @@ namespace Gdi32Fonts
                     FontCache[Key] = sharedObject;
                 }
 
-                SharedFont = sharedObject;
-                SharedFont.ReferenceCount++;
+                _SharedFont = sharedObject;
+                Logfont = _SharedFont.Logfont;
+
+                _SharedFont.ReferenceCount++;
             }
         }
 
@@ -118,7 +130,7 @@ namespace Gdi32Fonts
 
         public byte[] GetFontData()
         {
-            using (var hdc = DeviceContextSafeHandle.CreateMesuremetnDeviceContext())
+            using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
             {
                 var selectResult = NativeApi.SelectObject(hdc, Handle);
 
@@ -170,7 +182,7 @@ namespace Gdi32Fonts
             matrix.eM21.value = 0;
             matrix.eM22.value = 1;
 
-            using (var hdc = DeviceContextSafeHandle.CreateMesuremetnDeviceContext())
+            using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
             {
                 var selectResult = NativeApi.SelectObject(hdc, Handle);
 
@@ -179,9 +191,9 @@ namespace Gdi32Fonts
                     throw new Win32Exception();
                 }
 
-                var characterPlacement = NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE);
+                NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE, out var characterPlacement);
 
-                if (characterPlacement == null || characterPlacement.Glyphs.Length == 0)
+                if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
                 {
                     return false;
                 }
@@ -194,7 +206,7 @@ namespace Gdi32Fonts
             }
         }
 
-        public static bool TryGetGlyphMetrics(string fontFaceName, string text, FontSizeUnit fontSizeUnit, float size, out GlyphMetrics glyphMetrics)
+        public static bool TryGetGlyphMetrics(string fontFaceName, string text, FontSizeUnit fontSizeUnit, float size, out GlyphMetrics? glyphMetrics)
         {
             return Gdi32FontPool.GetPoolingFont(
                 faceName: fontFaceName,
@@ -209,7 +221,7 @@ namespace Gdi32Fonts
                 ).TryGetGlyphMetrics(text, out glyphMetrics);
         }
 
-        public bool TryGetGlyphMetrics(string text, out GlyphMetrics glyphMetrics)
+        public bool TryGetGlyphMetrics(string text, out GlyphMetrics? glyphMetrics)
         {
             MAT2 matrix = new MAT2();
             matrix.eM11.value = 1;
@@ -217,7 +229,7 @@ namespace Gdi32Fonts
             matrix.eM21.value = 0;
             matrix.eM22.value = 1;
 
-            using (var hdc = DeviceContextSafeHandle.CreateMesuremetnDeviceContext())
+            using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
             {
                 var selectResult = NativeApi.SelectObject(hdc, Handle);
 
@@ -226,9 +238,9 @@ namespace Gdi32Fonts
                     throw new Win32Exception();
                 }
 
-                var characterPlacement = NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE);
+                NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE, out var characterPlacement);
 
-                if (characterPlacement == null || characterPlacement.Glyphs.Length == 0)
+                if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
                 {
                     glyphMetrics = null;
                     return false;
@@ -249,7 +261,7 @@ namespace Gdi32Fonts
             }
         }
         
-        public static FontOutline GetOutline(string fontFaceName, string text, OutlineMode outlineMode)
+        public static FontOutline? GetOutline(string fontFaceName, string text, OutlineMode outlineMode)
         {
             return Gdi32FontPool.GetPoolingFont(
                 faceName: fontFaceName,
@@ -264,8 +276,13 @@ namespace Gdi32Fonts
                 ).GetOutline(text, outlineMode);
         }
 
-        public FontOutline GetOutline(string text, OutlineMode outlineMode)
+        public FontOutline? GetOutline(string text, OutlineMode outlineMode)
         {
+            if (SharedFont.OutlineTextMetric is null)
+            {
+                return null;
+            }
+
             // 参考文献
             // http://marupeke296.com/TIPS_Main.html
             // http://marupeke296.com/WINT_GetGlyphOutline.html
@@ -298,24 +315,27 @@ namespace Gdi32Fonts
                 matrix.eM21.value = 0;
                 matrix.eM22.value = 1;
 
-                using (var hdc = DeviceContextSafeHandle.CreateMesuremetnDeviceContext())
+                using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
                 {
                     // アウトライン取得用のフォントを生成。この時フォントサイズは制御店のメッシュサイズと一致させる。
                     // 一致しない場合は取得されるアウトラインの精度が著しく低下する場合がある。
-                    var font = Gdi32FontPool.GetPoolingFont(Key.FaceName, FontSizeUnit.Pixel, SharedFont.EMSquare, Key.Weight, Key.Italic, Key.Underline, Key.StrikeOut, Key.CharSet, Key.FontQuality);
+                    var outlineAccessFont = Gdi32FontPool.GetPoolingFont(Key.FaceName, FontSizeUnit.Pixel, SharedFont.OutlineTextMetric.Value.otmEMSquare, Key.Weight, Key.Italic, Key.Underline, Key.StrikeOut, Key.CharSet, Key.FontQuality);
 
-                    var selectResult = NativeApi.SelectObject(hdc, font.Handle);
+                    if (outlineAccessFont.SharedFont.OutlineTextMetric is null)
+                    {
+                        return null;
+                    }
+
+                    var selectResult = NativeApi.SelectObject(hdc, outlineAccessFont.Handle);
 
                     if (selectResult == IntPtr.Zero)
                     {
                         throw new Win32Exception();
                     }
 
-                    var outlineTextMetrics = NativeApi.GetOutlineTextMetrics(hdc);
+                    NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE, out var characterPlacement);
 
-                    var characterPlacement = NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE);
-
-                    if (characterPlacement == null || characterPlacement.Glyphs.Length == 0)
+                    if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
                     {
                         return null;
                     }
@@ -381,7 +401,7 @@ namespace Gdi32Fonts
                                     Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.x.fract == 0);
                                     Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.y.fract == 0);
 
-                                    curvePoints[i] = curvePoint.ToTtPolygonPoint(outlineTextMetrics, metrics);
+                                    curvePoints[i] = curvePoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics);
 
                                     index += pointFxSize;
                                 }
@@ -406,7 +426,7 @@ namespace Gdi32Fonts
                                 ttPolygonCurves.Add(new TtPolygonCurve(type, curvePoints.ToImmutableArray()));
                             }
 
-                            ttPolygons.Add(new TtPolygon(startPoint.ToTtPolygonPoint(outlineTextMetrics, metrics), ttPolygonCurves.ToImmutableArray()));
+                            ttPolygons.Add(new TtPolygon(startPoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics), ttPolygonCurves.ToImmutableArray()));
                         }
                     }
                     finally
@@ -419,7 +439,12 @@ namespace Gdi32Fonts
 
                     var glyphMetrics = new GlyphMetrics(metrics.gmBlackBoxX, metrics.gmBlackBoxY, metrics.gmptGlyphOrigin.x, metrics.gmptGlyphOrigin.y, metrics.gmCellIncX, metrics.gmCellIncY);
 
-                    return new FontOutline(SharedFont.EMSquare, outlineTextMetrics.otmMacAscent, glyphMetrics, ttPolygons.ToImmutableArray());
+                    return new FontOutline(
+                        outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmEMSquare,
+                        outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmMacAscent,
+                        glyphMetrics,
+                        ttPolygons.ToImmutableArray()
+                        );
                 }
             }
             catch (Win32Exception ex)
@@ -439,20 +464,23 @@ namespace Gdi32Fonts
             {
                 if (disposing)
                 {
-                    lock (FontCache)
+                    if (_SharedFont is { })
                     {
-                        SharedFont.ReferenceCount--;
-
-                        Debug.Assert(SharedFont.ReferenceCount >= 0);
-
-                        if (SharedFont.ReferenceCount <= 0)
+                        lock (FontCache)
                         {
-                            FontCache.Remove(Key);
-                            SharedFont.Dispose();
-                        }
-                    }
+                            _SharedFont.ReferenceCount--;
 
-                    SharedFont = null;
+                            Debug.Assert(SharedFont.ReferenceCount >= 0);
+
+                            if (_SharedFont.ReferenceCount <= 0)
+                            {
+                                FontCache.Remove(Key);
+                                _SharedFont.Dispose();
+                            }
+                        }
+
+                        _SharedFont = null;
+                    }
                 }
 
                 // TODO: アンマネージ リソース (アンマネージ オブジェクト) を解放し、下のファイナライザーをオーバーライドします。
@@ -504,10 +532,7 @@ namespace Gdi32Fonts
                 FontQuality = fontQuality;
             }
 
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as FontCacheKey);
-            }
+            public override bool Equals(object? obj) => obj is FontCacheKey key && Equals(key);
 
             public bool Equals(FontCacheKey other)
             {
@@ -560,9 +585,11 @@ namespace Gdi32Fonts
 
             public int ReferenceCount { get; set; }
 
-            public FontSafeHandle.LOGFONT Logfont { get; }
+            public readonly FontSafeHandle.LOGFONT Logfont;
 
-            public uint EMSquare { get; }
+            public int Win32ErrorCode { get; }
+
+            public readonly OutlineTextMetric? OutlineTextMetric;
 
             public SharedObject(string faceName, int height, int weight, byte italic, byte underline, byte strikeOut, byte charSet, Gdi32FontQuality fontQuality)
             {
@@ -571,11 +598,12 @@ namespace Gdi32Fonts
                 Logfont = new FontSafeHandle.LOGFONT();
 
                 var bufferSize = Marshal.SizeOf(Logfont);
-                var writeSize = GetObject(Handle, bufferSize, Logfont);
+                var writeSize = GetObject(Handle, bufferSize, ref Logfont);
 
                 if (writeSize == 0)
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    Win32ErrorCode = Marshal.GetLastWin32Error();
+                    return;
                 }
 
                 if (bufferSize != writeSize)
@@ -583,16 +611,26 @@ namespace Gdi32Fonts
                     throw new InvalidOperationException();
                 }
 
-                using (var hdc = DeviceContextSafeHandle.CreateMesuremetnDeviceContext())
+                using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
                 {
                     var selectResult = NativeApi.SelectObject(hdc, Handle);
 
                     if (selectResult == IntPtr.Zero)
                     {
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                        Win32ErrorCode = Marshal.GetLastWin32Error();
+                        return;
                     }
 
-                    EMSquare = NativeApi.GetOutlineTextMetrics(hdc).otmEMSquare;
+                    if (NativeApi.TryGetOutlineTextMetrics(hdc, out var outlineTextMetric, out var getOutlineTextMetricsErrorCode))
+                    {
+                        Win32ErrorCode = 0;
+                        OutlineTextMetric = outlineTextMetric;
+                    }
+                    else
+                    {
+                        Win32ErrorCode = getOutlineTextMetricsErrorCode;
+                        OutlineTextMetric = null;
+                    }
                 }
             }
 
@@ -603,9 +641,9 @@ namespace Gdi32Fonts
         }
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetObject(FontSafeHandle hFont, int nSize, [In] [Out] FontSafeHandle.LOGFONT lf);
+        private static extern int GetObject(FontSafeHandle hFont, int nSize, ref FontSafeHandle.LOGFONT lf);
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern uint GetFontData(DeviceContextSafeHandle hdc, uint dwTable, uint dwOffset, [Out] byte[] lpvBuffer, uint cbData);
+        static extern uint GetFontData(DeviceContextSafeHandle hdc, uint dwTable, uint dwOffset, [Out] byte[]? lpvBuffer, uint cbData);
     }
 }

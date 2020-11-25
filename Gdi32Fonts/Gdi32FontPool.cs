@@ -45,9 +45,14 @@ namespace Gdi32Fonts
 
         public static Gdi32Font GetPoolingFont(string faceName, FontSizeUnit fontSizeUnit, float size, int weight, byte italic, byte underline, byte strikeOut, byte charSet, Gdi32FontQuality fontQuality)
         {
+            return GetPoolingFont(faceName, fontSizeUnit, size, new Gdi32FontStyleInfo(weight, italic, underline, strikeOut), charSet, fontQuality);
+        }
+
+        public static Gdi32Font GetPoolingFont(string faceName, FontSizeUnit fontSizeUnit, float size, Gdi32FontStyleInfo fontStyle, byte charSet, Gdi32FontQuality fontQuality)
+        {
             lock (FontCache)
             {
-                var key = Gdi32Font.ToFontCacheKey(faceName, fontSizeUnit, size, new Gdi32FontStyleInfo(weight, italic, underline, strikeOut), charSet, fontQuality);
+                var key = Gdi32Font.ToFontCacheKey(faceName, fontSizeUnit, size, fontStyle, charSet, fontQuality);
 
                 var font = new Gdi32Font(key);
 

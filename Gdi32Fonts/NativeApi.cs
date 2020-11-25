@@ -35,15 +35,17 @@ namespace Gdi32Fonts
         /// デバイスコンテキストの現在のフォントのOutlineTextMetricを取得する。不正なハンドルや対象のフォントが字形を含まない場合はnullを返却する。
         /// </summary>
         /// <param name="hdc">デバイスコンテキスト</param>
+        /// <param name="win32ErrorCode">エラーコード</param>
         /// <returns>OutlineTextMetric</returns>
-        /// <exception cref="Win32Exception">不正なハンドル以外の理由によりWinApiの呼び出しが失敗</exception>
-        public static OutlineTextMetric GetOutlineTextMetrics(DeviceContextSafeHandle hdc)
+        public static bool TryGetOutlineTextMetrics(DeviceContextSafeHandle hdc, out OutlineTextMetric outlineTextMetric, out int win32ErrorCode)
         {
             uint bufferSize = GetOutlineTextMetrics(hdc, 0, IntPtr.Zero);
 
             if (bufferSize == 0)
             {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+                outlineTextMetric = default;
+                win32ErrorCode = Marshal.GetLastWin32Error();
+                return false;
             }
 
             IntPtr buffer = Marshal.AllocHGlobal((int)bufferSize);
@@ -54,12 +56,14 @@ namespace Gdi32Fonts
 
                 if (getOutlineTextMetricsResult == 0)
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    outlineTextMetric = default;
+                    win32ErrorCode = Marshal.GetLastWin32Error();
+                    return false;
                 }
 
                 OUTLINETEXTMETRIC nativeOutlineTextMetrics = (OUTLINETEXTMETRIC)Marshal.PtrToStructure(buffer, typeof(OUTLINETEXTMETRIC));
 
-                var outlineTextMetric = new OutlineTextMetric
+                outlineTextMetric = new OutlineTextMetric
                 {
                     otmSize = nativeOutlineTextMetrics.otmSize,
                     otmTextMetrics = nativeOutlineTextMetrics.otmTextMetrics,
@@ -97,7 +101,8 @@ namespace Gdi32Fonts
 
                 Debug.Assert(outlineTextMetric.otmSize == bufferSize);
 
-                return outlineTextMetric;
+                win32ErrorCode = 0;
+                return true;
             }
             finally
             {
@@ -116,11 +121,11 @@ namespace Gdi32Fonts
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
 
-        public static GcpResults GetCharacterPlacement(DeviceContextSafeHandle hdc, string text, GCPFlags flags)
+        public static void GetCharacterPlacement(DeviceContextSafeHandle hdc, string text, GCPFlags flags, out GcpResults gcpResults)
         {
             int len = text.Length;
 
-            var results = new GcpResults
+            gcpResults = new GcpResults
             {
                 Order = new int[len],
                 Dx = new int[len],
@@ -129,11 +134,11 @@ namespace Gdi32Fonts
                 Glyphs = new short[len],
             };
 
-            GCHandle ordHnd = GCHandle.Alloc(results.Order, GCHandleType.Pinned);
-            GCHandle dxHnd = GCHandle.Alloc(results.Dx, GCHandleType.Pinned);
-            GCHandle carHnd = GCHandle.Alloc(results.CaretPos, GCHandleType.Pinned);
-            GCHandle clsHnd = GCHandle.Alloc(results.Class, GCHandleType.Pinned);
-            GCHandle glyHnd = GCHandle.Alloc(results.Glyphs, GCHandleType.Pinned);
+            GCHandle ordHnd = GCHandle.Alloc(gcpResults.Order,    GCHandleType.Pinned);
+            GCHandle dxHnd  = GCHandle.Alloc(gcpResults.Dx,       GCHandleType.Pinned);
+            GCHandle carHnd = GCHandle.Alloc(gcpResults.CaretPos, GCHandleType.Pinned);
+            GCHandle clsHnd = GCHandle.Alloc(gcpResults.Class,    GCHandleType.Pinned);
+            GCHandle glyHnd = GCHandle.Alloc(gcpResults.Glyphs,   GCHandleType.Pinned);
 
             try
             {
@@ -158,10 +163,10 @@ namespace Gdi32Fonts
                     throw new Win32Exception();
                 }
 
-                results.OutString = rs.OutString;
-                results.MaxFit = rs.MaxFit;
+                gcpResults.OutString = rs.OutString;
+                gcpResults.MaxFit = rs.MaxFit;
 
-                return results;
+                return;
             }
             finally
             {
@@ -188,7 +193,7 @@ namespace Gdi32Fonts
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct FIXED
+    struct FIXED
     {
         public short fract;
         public short value;
@@ -197,25 +202,25 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct POINTFX
+    struct POINTFX
     {
 
         [MarshalAs(UnmanagedType.Struct)] public FIXED x;
         [MarshalAs(UnmanagedType.Struct)] public FIXED y;
 
-        public PointF ToPointF(OutlineTextMetric outlineTextMetric, GLYPHMETRICS metrics) => new PointF(
+        public PointF ToPointF(in OutlineTextMetric outlineTextMetric, GLYPHMETRICS metrics) => new PointF(
             x.ToFloat(),
             outlineTextMetric.otmEMSquare - outlineTextMetric.otmDescent - y.ToFloat()
             );
 
-        public TtPolygonPoint ToTtPolygonPoint(OutlineTextMetric outlineTextMetric, GLYPHMETRICS metrics) => new TtPolygonPoint(
+        public TtPolygonPoint ToTtPolygonPoint(in OutlineTextMetric outlineTextMetric, GLYPHMETRICS metrics) => new TtPolygonPoint(
             x.value,
             (short)(outlineTextMetric.otmEMSquare + outlineTextMetric.otmDescent - y.value)
             );
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct TTPOLYGONHEADER
+    struct TTPOLYGONHEADER
 
     {
 
@@ -225,7 +230,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct TTPOLYCURVEHEADER
+    struct TTPOLYCURVEHEADER
     {
 
         public short wType;
@@ -233,7 +238,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct POINT
+    struct POINT
     {
 
         public int x;
@@ -243,7 +248,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SIZE
+    struct SIZE
     {
 
         public int cx;
@@ -253,7 +258,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct GLYPHMETRICS
+    struct GLYPHMETRICS
     {
 
         public int gmBlackBoxX;
@@ -264,7 +269,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct MAT2
+    struct MAT2
     {
 
         [MarshalAs(UnmanagedType.Struct)] public FIXED eM11;
@@ -274,7 +279,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public struct TEXTMETRIC
+    struct TEXTMETRIC
     {
         public int tmHeight;
         public int tmAscent;
@@ -299,7 +304,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct RECT
+    struct RECT
     {
         public int Left, Top, Right, Bottom;
 
@@ -395,7 +400,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct PANOSE
+    struct PANOSE
     {
         public byte bFamilyType;
         public byte bSerifStyle;
@@ -410,7 +415,7 @@ namespace Gdi32Fonts
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public struct OUTLINETEXTMETRIC
+    struct OUTLINETEXTMETRIC
     {
         public uint otmSize;
         [MarshalAs(UnmanagedType.Struct)] public TEXTMETRIC otmTextMetrics;
@@ -446,7 +451,7 @@ namespace Gdi32Fonts
         public IntPtr otmpFullName;
     }
 
-    public class OutlineTextMetric
+    struct OutlineTextMetric
     {
         public uint otmSize;
         public TEXTMETRIC otmTextMetrics;
@@ -485,7 +490,7 @@ namespace Gdi32Fonts
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct GCP_RESULTS
+    struct GCP_RESULTS
     {
         public int StructSize;
         [MarshalAs(UnmanagedType.LPTStr)]
@@ -499,7 +504,7 @@ namespace Gdi32Fonts
         public int MaxFit;
     }
 
-    public class GcpResults
+    struct GcpResults
     {
         public string OutString;
         public int[] Order;
@@ -511,7 +516,7 @@ namespace Gdi32Fonts
     }
 
     [Flags]
-    public enum GCPFlags : uint
+    enum GCPFlags : uint
     {
         GCP_DBCS = 0x0001,
         GCP_REORDER = 0x0002,

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net45;net5.0-windows</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
     <UseWindowsForms>True</UseWindowsForms>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

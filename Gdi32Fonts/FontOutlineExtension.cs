@@ -11,6 +11,9 @@ namespace Gdi32Fonts
     {
         public static string ToSvgPathData(this FontOutline outline, float size, PointF origin, bool enableHorizontalCenteringMode)
         {
+            if (outline is null) throw new ArgumentNullException(nameof(outline));
+            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size));
+
             // https://developer.mozilla.org/ja/docs/Web/SVG/Tutorial
             // https://svgwg.org/svg2-draft/paths.html#PathElement
 

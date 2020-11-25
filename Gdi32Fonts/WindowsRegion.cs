@@ -30,7 +30,15 @@ namespace Gdi32Fonts
 
     internal sealed class WindowsRegion : MarshalByRefObject, ICloneable, IDisposable
     {
-        public WindowsRegionSafeHandle HRegion { get; set; }
+        WindowsRegionSafeHandle? _HRegion;
+        public WindowsRegionSafeHandle HRegion
+        {
+            get
+            {
+                if (_HRegion is null) throw new ObjectDisposedException(nameof(WindowsRegion));
+                return _HRegion;
+            }
+        }
 
         public bool IsInfinite
         {
@@ -42,12 +50,12 @@ namespace Gdi32Fonts
 
         private WindowsRegion(WindowsRegionSafeHandle hRegion)
         {
-            HRegion = hRegion;
+            _HRegion = hRegion;
         }
 
         public WindowsRegion(Rectangle rect)
         {
-            HRegion = CreateRectRgn(rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height);
+            _HRegion = CreateRectRgn(rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height);
         }
 
         public WindowsRegion(int x, int y, int width, int height)
@@ -93,10 +101,10 @@ namespace Gdi32Fonts
 
         public void Dispose(bool disposing)
         {
-            if (HRegion != null)
+            if (_HRegion is { })
             {
-                HRegion.Dispose();
-                HRegion = null;
+                _HRegion.Dispose();
+                _HRegion = null;
 
                 if (disposing)
                 {

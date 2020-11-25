@@ -14,7 +14,7 @@ namespace Gdi32Fonts
         {
         }
 
-        public static DeviceContextSafeHandle CreateMesuremetnDeviceContext()
+        public static DeviceContextSafeHandle CreateMesurementDeviceContext()
         {
             return CreateCompatibleDC(new HandleRef(null, IntPtr.Zero));
         }

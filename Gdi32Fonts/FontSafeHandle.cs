@@ -32,7 +32,7 @@ namespace Gdi32Fonts
         {
         }
 
-        static FontSafeHandle CreateFont(LOGFONT logfont)
+        static FontSafeHandle CreateFont(in LOGFONT logfont)
         {
             return CreateFontIndirect(logfont);
         }
@@ -69,7 +69,7 @@ namespace Gdi32Fonts
 
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        internal class LOGFONT
+        internal struct LOGFONT
         {
             public int lfHeight;
 
@@ -100,10 +100,6 @@ namespace Gdi32Fonts
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
             public string lfFaceName;
 
-            public LOGFONT()
-            {
-            }
-
             public LOGFONT(LOGFONT lf)
             {
                 this.lfHeight = lf.lfHeight;
@@ -125,7 +121,7 @@ namespace Gdi32Fonts
 
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern FontSafeHandle CreateFontIndirect([MarshalAs(UnmanagedType.AsAny)] [In] [Out] object lf);
+        private static extern FontSafeHandle CreateFontIndirect(in LOGFONT lf);
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         private static extern bool DeleteObject(IntPtr hObject);
