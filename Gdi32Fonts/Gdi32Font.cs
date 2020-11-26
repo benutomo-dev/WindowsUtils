@@ -206,7 +206,7 @@ namespace Gdi32Fonts
             }
         }
 
-        public static bool TryGetGlyphMetrics(string fontFaceName, string text, FontSizeUnit fontSizeUnit, float size, out GlyphMetrics? glyphMetrics)
+        public static bool TryGetGlyphMetrics(string fontFaceName, string text, FontSizeUnit fontSizeUnit, float size, out GlyphMetrics glyphMetrics)
         {
             return Gdi32FontPool.GetPoolingFont(
                 faceName: fontFaceName,
@@ -221,7 +221,7 @@ namespace Gdi32Fonts
                 ).TryGetGlyphMetrics(text, out glyphMetrics);
         }
 
-        public bool TryGetGlyphMetrics(string text, out GlyphMetrics? glyphMetrics)
+        public bool TryGetGlyphMetrics(string text, out GlyphMetrics glyphMetrics)
         {
             MAT2 matrix = new MAT2();
             matrix.eM11.value = 1;
@@ -242,7 +242,7 @@ namespace Gdi32Fonts
 
                 if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
                 {
-                    glyphMetrics = null;
+                    glyphMetrics = default;
                     return false;
                 }
 
@@ -252,7 +252,7 @@ namespace Gdi32Fonts
 
                 if (bufferSize <= 0)
                 {
-                    glyphMetrics = null;
+                    glyphMetrics = default;
                     return false;
                 }
 

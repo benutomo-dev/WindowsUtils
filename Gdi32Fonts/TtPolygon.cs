@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Gdi32Fonts
 {
-    public class GlyphMetrics : IEquatable<GlyphMetrics>
+    public struct GlyphMetrics : IEquatable<GlyphMetrics>
     {
         public int BlackBoxX { get; }
         public int BlackBoxY { get; }
@@ -66,24 +66,42 @@ namespace Gdi32Fonts
 
         public override string ToString() => $"{{{nameof(BlackBoxX)}={BlackBoxX},{nameof(BlackBoxY)}={BlackBoxY},{nameof(GlyphOriginX)}={GlyphOriginX},{nameof(GlyphOriginY)}={GlyphOriginY},{nameof(CellIncX)}={CellIncX},{nameof(CellIncY)}={CellIncY}}}";
 
-        public override int GetHashCode() => BlackBoxX ^ BlackBoxY ^ GlyphOriginX ^ GlyphOriginY ^ CellIncX ^ CellIncY;
-
-        public override bool Equals(object obj) => (obj is GlyphMetrics other) && Equals(other);
+        public override bool Equals(object? obj)
+        {
+            return obj is GlyphMetrics metrics && Equals(metrics);
+        }
 
         public bool Equals(GlyphMetrics other)
         {
-            return !(other is null)
-                && BlackBoxX == other.BlackBoxX
-                && BlackBoxY == other.BlackBoxY
-                && GlyphOriginX == other.GlyphOriginX
-                && GlyphOriginY == other.GlyphOriginY
-                && CellIncX == other.CellIncX
-                && CellIncY == other.CellIncY
-                ;
+            return BlackBoxX == other.BlackBoxX &&
+                   BlackBoxY == other.BlackBoxY &&
+                   GlyphOriginX == other.GlyphOriginX &&
+                   GlyphOriginY == other.GlyphOriginY &&
+                   CellIncX == other.CellIncX &&
+                   CellIncY == other.CellIncY;
         }
 
-        public static bool operator ==(GlyphMetrics a, GlyphMetrics b) => (a is null && b is null) || (a?.Equals(b) ?? false);
-        public static bool operator !=(GlyphMetrics a, GlyphMetrics b) => !(a == b);
+        public override int GetHashCode()
+        {
+            int hashCode = 1140044481;
+            hashCode = hashCode * -1521134295 + BlackBoxX.GetHashCode();
+            hashCode = hashCode * -1521134295 + BlackBoxY.GetHashCode();
+            hashCode = hashCode * -1521134295 + GlyphOriginX.GetHashCode();
+            hashCode = hashCode * -1521134295 + GlyphOriginY.GetHashCode();
+            hashCode = hashCode * -1521134295 + CellIncX.GetHashCode();
+            hashCode = hashCode * -1521134295 + CellIncY.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(GlyphMetrics left, GlyphMetrics right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(GlyphMetrics left, GlyphMetrics right)
+        {
+            return !(left == right);
+        }
     }
 
     public class FontOutline : IEquatable<FontOutline>
@@ -98,11 +116,11 @@ namespace Gdi32Fonts
 
         private Lazy<int> _hash;
 
-        public FontOutline(uint emSquare, int ascent, GlyphMetrics glyphMetrics, ImmutableArray<TtPolygon> polygons)
+        public FontOutline(uint emSquare, int ascent, in GlyphMetrics glyphMetrics, ImmutableArray<TtPolygon> polygons)
         {
             EmSquare = emSquare;
             Ascent = ascent;
-            GlyphMetrics = glyphMetrics ?? throw new ArgumentNullException(nameof(glyphMetrics));
+            GlyphMetrics = glyphMetrics;
             Polygons = polygons;
 
             _hash = new Lazy<int>(() =>
