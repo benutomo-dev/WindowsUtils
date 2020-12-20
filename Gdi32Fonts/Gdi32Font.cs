@@ -159,7 +159,9 @@ namespace Gdi32Fonts
             }
         }
 
-        public static bool ExistsOutline(string fontFaceName, string text)
+        public static bool ExistsOutline(string fontFaceName, string text) => ExistsOutline(fontFaceName, text, out _);
+
+        public static bool ExistsOutline(string fontFaceName, string text, out uint glyphIndex)
         {
             return Gdi32FontPool.GetPoolingFont(
                 faceName: fontFaceName,
@@ -171,10 +173,12 @@ namespace Gdi32Fonts
                 strikeOut: 0,
                 charSet: 1,
                 fontQuality: Gdi32FontQuality.Default
-                ).ExistsOutline(text);
+                ).ExistsOutline(text, out glyphIndex);
         }
 
-        public bool ExistsOutline(string text)
+        public bool ExistsOutline(string text) => ExistsOutline(text, out _);
+
+        public bool ExistsOutline(string text, out uint glyphIndex)
         {
             MAT2 matrix = new MAT2();
             matrix.eM11.value = 1;
@@ -195,10 +199,11 @@ namespace Gdi32Fonts
 
                 if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
                 {
+                    glyphIndex = 0;
                     return false;
                 }
 
-                uint glyphIndex = (uint)characterPlacement.Glyphs[0];
+                glyphIndex = (uint)characterPlacement.Glyphs[0];
 
                 int bufferSize = (int)NativeApi.GetGlyphOutline(hdc, glyphIndex, GGO_GLYPH_INDEX | GGO_NATIVE, out GLYPHMETRICS metrics, 0, IntPtr.Zero, ref matrix);
 
