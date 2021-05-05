@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -46,7 +47,13 @@ namespace WindowsControls
         public TaskDialogFallbackIcon SecurityErrorFallbackIcon { get; set; }
         public TaskDialogFallbackIcon SecuritySucessFallbackIcon { get; set; }
         public TaskDialogFallbackIcon ShieldGrayFallbackIcon { get; set; }
-        
+
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public IntPtr Handle => activeTaskDialog.Handle;
+
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public IntPtr OwnerHandle => activeTaskDialog.OwnerHandle;
+
         public TaskDialogIcon FooterIcon { get; set; }
 
         public TaskDialogIcon MainIcon { get; set; }
