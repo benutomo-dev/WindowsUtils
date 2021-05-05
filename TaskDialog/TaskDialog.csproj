@@ -12,6 +12,7 @@
     <Description>The TaskDialog is wrapper of native Task Dialog of Windows7 or grater.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
+    <PackageVersion>1.0.0</PackageVersion>
     <AssemblyVersion>1.1.1.0</AssemblyVersion>
   </PropertyGroup>
 

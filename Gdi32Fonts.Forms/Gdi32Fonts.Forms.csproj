@@ -14,6 +14,7 @@
     <Description>The Gdi32Fonts.Forms is a option module for WindowsForms of Gdi32Fonts.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
+    <PackageVersion>1.0.0</PackageVersion>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

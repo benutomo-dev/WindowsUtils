@@ -14,7 +14,8 @@
     <Copyright>Copyright © 2020 benutomo</Copyright>
     <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    
+
+    <PackageVersion>1.0.0</PackageVersion>
     <AssemblyVersion>1.1.0.1</AssemblyVersion>
   </PropertyGroup>
 

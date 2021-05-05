@@ -11,6 +11,9 @@
     <Copyright>Copyright © 2020 benutomo</Copyright>
     <Description>The StockIcons is utilities for useing icons of Shell32.dll.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <PackageVersion>1.0.0</PackageVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
