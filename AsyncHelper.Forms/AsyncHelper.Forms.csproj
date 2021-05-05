@@ -15,7 +15,7 @@
     <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <AssemblyVersion>1.1.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

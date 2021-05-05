@@ -25,11 +25,29 @@ namespace WindowsControls.Aysnc.Forms
 
                 using (modalExecutionBlock.Enter())
                 {
-                    do
+                    var currentExecutionContext = ExecutionContext.Capture();
+
+                    if (currentExecutionContext is null)
                     {
-                        Application.DoEvents();
+                        do
+                        {
+                            Application.DoEvents();
+                        }
+                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
                     }
-                    while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
+                    else
+                    {
+                        // Application.DoEvents()を実行するとExecutionContextが消失するため、
+                        // ExecutionContext.Run内で実行して、実行元のExecutionContextを保護する
+                        ExecutionContext.Run(currentExecutionContext, _ =>
+                        {
+                            do
+                            {
+                                Application.DoEvents();
+                            }
+                            while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
+                        }, null);
+                    }
 
                     if (task.IsCanceled || task.IsFaulted)
                     {
@@ -52,32 +70,7 @@ namespace WindowsControls.Aysnc.Forms
                 return true;
             }
 
-            var timer = Stopwatch.StartNew();
-            if (Application.MessageLoop)
-            {
-                modalExecutionBlock ??= ModalExecutionBlock.Default;
-
-                using (modalExecutionBlock.Enter())
-                {
-                    do
-                    {
-                        Application.DoEvents();
-                    }
-                    while (!valueTask.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
-
-                    if (valueTask.IsCanceled || valueTask.IsFaulted)
-                    {
-                        valueTask.GetAwaiter().GetResult();
-                    }
-
-                    return valueTask.IsCompleted;
-                }
-            }
-            else
-            {
-                var task = valueTask.AsTask();
-                return task.Wait(millisecondsTimeout);
-            }
+            return valueTask.AsTask().WaitWhileDoingMessageLoopEvents(millisecondsTimeout, modalExecutionBlock);
         }
 
         public static bool WaitWhileDoingMessageLoopEvents<T>(this in ValueTask<T> valueTask, out T result, int millisecondsTimeout = -1, ModalExecutionBlock? modalExecutionBlock = null)
@@ -88,44 +81,19 @@ namespace WindowsControls.Aysnc.Forms
                 return true;
             }
 
-            var timer = Stopwatch.StartNew();
-            if (Application.MessageLoop)
+            var task = valueTask.AsTask();
+
+            task.WaitWhileDoingMessageLoopEvents(millisecondsTimeout, modalExecutionBlock);
+
+            if (task.IsCompleted)
             {
-                modalExecutionBlock ??= ModalExecutionBlock.Default;
-
-                using (modalExecutionBlock.Enter())
-                {
-                    do
-                    {
-                        Application.DoEvents();
-                    }
-                    while (!valueTask.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
-
-                    if (valueTask.IsCompleted)
-                    {
-                        result = valueTask.Result;
-                        return true;
-                    }
-                    else
-                    {
-                        result = default!;
-                        return false;
-                    }
-                }
+                result = task.Result;
+                return true;
             }
             else
             {
-                var task = valueTask.AsTask();
-                if (task.Wait(millisecondsTimeout))
-                {
-                    result = task.Result;
-                    return true;
-                }
-                else
-                {
-                    result = default!;
-                    return false;
-                }
+                result = default!;
+                return false;
             }
         }
 
