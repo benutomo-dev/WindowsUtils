@@ -161,7 +161,7 @@ namespace Gdi32Fonts
 
         public static bool ExistsOutline(string fontFaceName, string text) => ExistsOutline(fontFaceName, text, out _);
 
-        public static bool ExistsOutline(string fontFaceName, string text, out uint glyphIndex)
+        public static bool ExistsOutline(string fontFaceName, string text, out ushort glyphIndex)
         {
             return Gdi32FontPool.GetPoolingFont(
                 faceName: fontFaceName,
@@ -178,7 +178,7 @@ namespace Gdi32Fonts
 
         public bool ExistsOutline(string text) => ExistsOutline(text, out _);
 
-        public bool ExistsOutline(string text, out uint glyphIndex)
+        public bool ExistsOutline(string text, out ushort glyphIndex)
         {
             MAT2 matrix = new MAT2();
             matrix.eM11.value = 1;
@@ -203,7 +203,7 @@ namespace Gdi32Fonts
                     return false;
                 }
 
-                glyphIndex = (uint)characterPlacement.Glyphs[0];
+                glyphIndex = characterPlacement.Glyphs[0];
 
                 int bufferSize = (int)NativeApi.GetGlyphOutline(hdc, glyphIndex, GGO_GLYPH_INDEX | GGO_NATIVE, out GLYPHMETRICS metrics, 0, IntPtr.Zero, ref matrix);
 
@@ -281,6 +281,21 @@ namespace Gdi32Fonts
                 ).GetOutline(text, outlineMode);
         }
 
+        public static FontOutline? GetOutline(string fontFaceName, ushort glyphIndex, OutlineMode outlineMode)
+        {
+            return Gdi32FontPool.GetPoolingFont(
+                faceName: fontFaceName,
+                fontSizeUnit: FontSizeUnit.Pixel,
+                size: 12,
+                weight: FW_NORMAL,
+                italic: 0,
+                underline: 0,
+                strikeOut: 0,
+                charSet: 1,
+                fontQuality: Gdi32FontQuality.Default
+                ).GetOutline(glyphIndex, outlineMode);
+        }
+
         public FontOutline? GetOutline(string text, OutlineMode outlineMode)
         {
             if (SharedFont.OutlineTextMetric is null)
@@ -288,38 +303,8 @@ namespace Gdi32Fonts
                 return null;
             }
 
-            // 参考文献
-            // http://marupeke296.com/TIPS_Main.html
-            // http://marupeke296.com/WINT_GetGlyphOutline.html
-            // http://marupeke296.com/DXG_No67_NewFont.html
-            // https://msdn.microsoft.com/ja-jp/library/cc410385.aspx
-            // https://msdn.microsoft.com/ja-jp/library/cc428640.aspx
-            // https://www11.atwiki.jp/slice/pages/78.html
-            // http://dendrocopos.jp/tips/win32.html
-            // http://www.geocities.co.jp/Playtown-Dice/9391/program/win04.html
-            // http://misohena.jp/article/ggo_trap/index.html
-            // https://oshiete.goo.ne.jp/qa/4743793.html
-            // http://eternalwindows.jp/graphics/bitmap/bitmap12.html
-            // https://social.msdn.microsoft.com/Forums/ja-JP/3442d813-823a-449a-993e-7fc073aea949/opentype?forum=vcgeneralja
-            // http://phys.cool.coocan.jp/physjpn/htextmetric.htm
-            // https://docs.microsoft.com/ja-jp/windows/desktop/api/wingdi/ns-wingdi-_outlinetextmetricw
-            // 
-            // 参考資料
-            // https://support.microsoft.com/en-us/help/87115/how-to-getglyphoutline-native-buffer-format
-            // http://kone.vis.ne.jp/diary/diaryb08.html
-            // https://msdn.microsoft.com/ja-jp/library/windows/desktop/dd144891(v=vs.85).aspx
-            //
-
             try
             {
-
-                GLYPHMETRICS metrics = new GLYPHMETRICS();
-                MAT2 matrix = new MAT2();
-                matrix.eM11.value = 1;
-                matrix.eM12.value = 0;
-                matrix.eM21.value = 0;
-                matrix.eM22.value = 1;
-
                 using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
                 {
                     // アウトライン取得用のフォントを生成。この時フォントサイズは制御店のメッシュサイズと一致させる。
@@ -345,112 +330,197 @@ namespace Gdi32Fonts
                         return null;
                     }
 
-                    var size = NativeApi.GetTextExtentPoint(hdc, text);
+                    ushort glyphIndex = characterPlacement.Glyphs[0];
 
-                    uint glyphIndex = (uint)characterPlacement.Glyphs[0];
+                    return GetOutlineCore(hdc, outlineAccessFont, glyphIndex, outlineMode);
+                }
+            }
+            catch (Win32Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return null;
+            }
+        }
 
-                    uint format = GGO_GLYPH_INDEX | (outlineMode == OutlineMode.Bezier ? GGO_BEZIER : GGO_NATIVE);
+        public FontOutline? GetOutline(ushort glyphIndex, OutlineMode outlineMode)
+        {
+            if (SharedFont.OutlineTextMetric is null)
+            {
+                return null;
+            }
 
-                    int bufferSize = (int)NativeApi.GetGlyphOutline(hdc, glyphIndex, format, out metrics, 0, IntPtr.Zero, ref matrix);
+            try
+            {
+                using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
+                {
+                    // アウトライン取得用のフォントを生成。この時フォントサイズは制御店のメッシュサイズと一致させる。
+                    // 一致しない場合は取得されるアウトラインの精度が著しく低下する場合がある。
+                    var outlineAccessFont = Gdi32FontPool.GetPoolingFont(Key.FaceName, FontSizeUnit.Pixel, SharedFont.OutlineTextMetric.Value.otmEMSquare, Key.Weight, Key.Italic, Key.Underline, Key.StrikeOut, Key.CharSet, Key.FontQuality);
 
-                    if (bufferSize <= 0)
+                    if (outlineAccessFont.SharedFont.OutlineTextMetric is null)
                     {
                         return null;
                     }
 
-                    IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
+                    var selectResult = NativeApi.SelectObject(hdc, outlineAccessFont.Handle);
 
-                    List<TtPolygon> ttPolygons = new List<TtPolygon>();
-                    try
+                    if (selectResult == IntPtr.Zero)
                     {
-                        uint ret = NativeApi.GetGlyphOutline(hdc, glyphIndex, format, out metrics, (uint)bufferSize, buffer, ref matrix);
+                        throw new Win32Exception();
+                    }
 
-                        if (ret == GDI_ERROR)
+                    return GetOutlineCore(hdc, outlineAccessFont, glyphIndex, outlineMode);
+                }
+            }
+            catch (Win32Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return null;
+            }
+        }
+
+        private FontOutline? GetOutlineCore(DeviceContextSafeHandle hdc, Gdi32Font outlineAccessFont, ushort glyphIndex, OutlineMode outlineMode)
+        {
+            if (outlineAccessFont.SharedFont.OutlineTextMetric is null)
+            {
+                Debug.Fail("実装ミス。本来は呼び出し元で先にreturnしているはず。");
+                return null;
+            }
+
+
+            // 参考文献
+            // http://marupeke296.com/TIPS_Main.html
+            // http://marupeke296.com/WINT_GetGlyphOutline.html
+            // http://marupeke296.com/DXG_No67_NewFont.html
+            // https://msdn.microsoft.com/ja-jp/library/cc410385.aspx
+            // https://msdn.microsoft.com/ja-jp/library/cc428640.aspx
+            // https://www11.atwiki.jp/slice/pages/78.html
+            // http://dendrocopos.jp/tips/win32.html
+            // http://www.geocities.co.jp/Playtown-Dice/9391/program/win04.html
+            // http://misohena.jp/article/ggo_trap/index.html
+            // https://oshiete.goo.ne.jp/qa/4743793.html
+            // http://eternalwindows.jp/graphics/bitmap/bitmap12.html
+            // https://social.msdn.microsoft.com/Forums/ja-JP/3442d813-823a-449a-993e-7fc073aea949/opentype?forum=vcgeneralja
+            // http://phys.cool.coocan.jp/physjpn/htextmetric.htm
+            // https://docs.microsoft.com/ja-jp/windows/desktop/api/wingdi/ns-wingdi-_outlinetextmetricw
+            // 
+            // 参考資料
+            // https://support.microsoft.com/en-us/help/87115/how-to-getglyphoutline-native-buffer-format
+            // http://kone.vis.ne.jp/diary/diaryb08.html
+            // https://msdn.microsoft.com/ja-jp/library/windows/desktop/dd144891(v=vs.85).aspx
+            //
+
+            try
+            {
+                GLYPHMETRICS metrics = new GLYPHMETRICS();
+                MAT2 matrix = new MAT2();
+                matrix.eM11.value = 1;
+                matrix.eM12.value = 0;
+                matrix.eM21.value = 0;
+                matrix.eM22.value = 1;
+
+
+                uint format = GGO_GLYPH_INDEX | (outlineMode == OutlineMode.Bezier ? GGO_BEZIER : GGO_NATIVE);
+
+                int bufferSize = (int)NativeApi.GetGlyphOutline(hdc, glyphIndex, format, out metrics, 0, IntPtr.Zero, ref matrix);
+
+                if (bufferSize <= 0)
+                {
+                    return null;
+                }
+
+                IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
+
+                List<TtPolygon> ttPolygons = new List<TtPolygon>();
+                try
+                {
+                    uint ret = NativeApi.GetGlyphOutline(hdc, glyphIndex, format, out metrics, (uint)bufferSize, buffer, ref matrix);
+
+                    if (ret == GDI_ERROR)
+                    {
+                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                    }
+
+                    int polygonHeaderSize = Marshal.SizeOf(typeof(TTPOLYGONHEADER));
+                    int curveHeaderSize = Marshal.SizeOf(typeof(TTPOLYCURVEHEADER));
+                    int pointFxSize = Marshal.SizeOf(typeof(POINTFX));
+
+                    int index = 0;
+                    while (index < bufferSize)
+                    {
+                        TTPOLYGONHEADER header = (TTPOLYGONHEADER)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(TTPOLYGONHEADER));
+
+                        POINTFX startPoint = header.pfxStart;
+
+                        // サイズをfontEmSquareで指定して内部メッシュと一致させているので、正しくできている限り端数は生じない。
+                        Debug.Assert(startPoint.x.fract == 0);
+                        Debug.Assert(startPoint.y.fract == 0);
+
+                        int endCurvesIndex = index + header.cb;
+                        index += polygonHeaderSize;
+
+                        List<TtPolygonCurve> ttPolygonCurves = new List<TtPolygonCurve>();
+
+                        while (index < endCurvesIndex)
                         {
-                            throw new Win32Exception(Marshal.GetLastWin32Error());
-                        }
+                            TTPOLYCURVEHEADER curveHeader = (TTPOLYCURVEHEADER)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(TTPOLYCURVEHEADER));
+                            index += curveHeaderSize;
 
-                        int polygonHeaderSize = Marshal.SizeOf(typeof(TTPOLYGONHEADER));
-                        int curveHeaderSize = Marshal.SizeOf(typeof(TTPOLYCURVEHEADER));
-                        int pointFxSize = Marshal.SizeOf(typeof(POINTFX));
+                            TtPolygonPoint[] curvePoints = new TtPolygonPoint[curveHeader.cpfx];
 
-                        int index = 0;
-                        while (index < bufferSize)
-                        {
-                            TTPOLYGONHEADER header = (TTPOLYGONHEADER)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(TTPOLYGONHEADER));
-
-                            POINTFX startPoint = header.pfxStart;
-
-                            // サイズをfontEmSquareで指定して内部メッシュと一致させているので、正しくできている限り端数は生じない。
-                            Debug.Assert(startPoint.x.fract == 0);
-                            Debug.Assert(startPoint.y.fract == 0);
-
-                            int endCurvesIndex = index + header.cb;
-                            index += polygonHeaderSize;
-
-                            List<TtPolygonCurve> ttPolygonCurves = new List<TtPolygonCurve>();
-
-                            while (index < endCurvesIndex)
+                            for (int i = 0; i < curveHeader.cpfx; i++)
                             {
-                                TTPOLYCURVEHEADER curveHeader = (TTPOLYCURVEHEADER)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(TTPOLYCURVEHEADER));
-                                index += curveHeaderSize;
+                                var curvePoint = (POINTFX)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(POINTFX));
 
-                                TtPolygonPoint[] curvePoints = new TtPolygonPoint[curveHeader.cpfx];
+                                // サイズをfontEmSquareで指定して内部メッシュと一致させているので、正しくできている限り端数は生じない。
+                                // ただし、ベジェ曲線に変換している場合は制御店の創出により端数が生じる。
+                                Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.x.fract == 0);
+                                Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.y.fract == 0);
 
-                                for (int i = 0; i < curveHeader.cpfx; i++)
-                                {
-                                    var curvePoint = (POINTFX)Marshal.PtrToStructure(new IntPtr(buffer.ToInt64() + index), typeof(POINTFX));
+                                curvePoints[i] = curvePoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics);
 
-                                    // サイズをfontEmSquareで指定して内部メッシュと一致させているので、正しくできている限り端数は生じない。
-                                    // ただし、ベジェ曲線に変換している場合は制御店の創出により端数が生じる。
-                                    Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.x.fract == 0);
-                                    Debug.Assert(outlineMode != OutlineMode.Native || curvePoint.y.fract == 0);
-
-                                    curvePoints[i] = curvePoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics);
-
-                                    index += pointFxSize;
-                                }
-
-                                TtPrimitiveTypes type;
-                                switch (curveHeader.wType)
-                                {
-                                    case TT_PRIM_LINE:
-                                        type = TtPrimitiveTypes.Line;
-                                        break;
-                                    case TT_PRIM_QSPLINE:
-                                        Debug.Assert(outlineMode == OutlineMode.Native);
-                                        type = TtPrimitiveTypes.QuadraticBezierSpline;
-                                        break;
-                                    case TT_PRIM_CSPLINE:
-                                        Debug.Assert(outlineMode == OutlineMode.Bezier);
-                                        type = TtPrimitiveTypes.CubicBezierSpline;
-                                        break;
-                                    default: throw new FormatException();
-                                }
-
-                                ttPolygonCurves.Add(new TtPolygonCurve(type, curvePoints.ToImmutableArray()));
+                                index += pointFxSize;
                             }
 
-                            ttPolygons.Add(new TtPolygon(startPoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics), ttPolygonCurves.ToImmutableArray()));
+                            TtPrimitiveTypes type;
+                            switch (curveHeader.wType)
+                            {
+                                case TT_PRIM_LINE:
+                                    type = TtPrimitiveTypes.Line;
+                                    break;
+                                case TT_PRIM_QSPLINE:
+                                    Debug.Assert(outlineMode == OutlineMode.Native);
+                                    type = TtPrimitiveTypes.QuadraticBezierSpline;
+                                    break;
+                                case TT_PRIM_CSPLINE:
+                                    Debug.Assert(outlineMode == OutlineMode.Bezier);
+                                    type = TtPrimitiveTypes.CubicBezierSpline;
+                                    break;
+                                default: throw new FormatException();
+                            }
+
+                            ttPolygonCurves.Add(new TtPolygonCurve(type, curvePoints.ToImmutableArray()));
                         }
+
+                        ttPolygons.Add(new TtPolygon(startPoint.ToTtPolygonPoint(outlineAccessFont.SharedFont.OutlineTextMetric.Value, metrics), ttPolygonCurves.ToImmutableArray()));
                     }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(buffer);
-                    }
-
-                    Debug.Assert(metrics.gmCellIncX >= 0);
-                    Debug.Assert(metrics.gmCellIncY >= 0);
-
-                    var glyphMetrics = new GlyphMetrics(metrics.gmBlackBoxX, metrics.gmBlackBoxY, metrics.gmptGlyphOrigin.x, metrics.gmptGlyphOrigin.y, metrics.gmCellIncX, metrics.gmCellIncY);
-
-                    return new FontOutline(
-                        outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmEMSquare,
-                        outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmMacAscent,
-                        glyphMetrics,
-                        ttPolygons.ToImmutableArray()
-                        );
                 }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+
+                Debug.Assert(metrics.gmCellIncX >= 0);
+                Debug.Assert(metrics.gmCellIncY >= 0);
+
+                var glyphMetrics = new GlyphMetrics(metrics.gmBlackBoxX, metrics.gmBlackBoxY, metrics.gmptGlyphOrigin.x, metrics.gmptGlyphOrigin.y, metrics.gmCellIncX, metrics.gmCellIncY);
+
+                return new FontOutline(
+                    outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmEMSquare,
+                    outlineAccessFont.SharedFont.OutlineTextMetric.Value.otmMacAscent,
+                    glyphMetrics,
+                    ttPolygons.ToImmutableArray()
+                    );
             }
             catch (Win32Exception ex)
             {

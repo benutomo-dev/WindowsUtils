@@ -131,7 +131,7 @@ namespace Gdi32Fonts
                 Dx = new int[len],
                 CaretPos = new int[len],
                 Class = new byte[len],
-                Glyphs = new short[len],
+                Glyphs = new ushort[len],
             };
 
             GCHandle ordHnd = GCHandle.Alloc(gcpResults.Order,    GCHandleType.Pinned);
@@ -511,7 +511,7 @@ namespace Gdi32Fonts
         public int[] Dx;
         public int[] CaretPos;
         public byte[] Class;
-        public short[] Glyphs;
+        public ushort[] Glyphs;
         public int MaxFit;
     }
 
