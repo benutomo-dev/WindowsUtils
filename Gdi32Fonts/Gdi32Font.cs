@@ -159,6 +159,45 @@ namespace Gdi32Fonts
             }
         }
 
+        public static bool TryGetGlyphIndex(string fontFaceName, string text, out ushort glyphIndex)
+        {
+            return Gdi32FontPool.GetPoolingFont(
+                faceName: fontFaceName,
+                fontSizeUnit: FontSizeUnit.Pixel,
+                size: 12,
+                weight: FW_NORMAL,
+                italic: 0,
+                underline: 0,
+                strikeOut: 0,
+                charSet: 1,
+                fontQuality: Gdi32FontQuality.Default
+                ).TryGetGlyphIndex(text, out glyphIndex);
+        }
+
+        public bool TryGetGlyphIndex(string text, out ushort glyphIndex)
+        {
+            using (var hdc = DeviceContextSafeHandle.CreateMesurementDeviceContext())
+            {
+                var selectResult = NativeApi.SelectObject(hdc, Handle);
+
+                if (selectResult == IntPtr.Zero)
+                {
+                    throw new Win32Exception();
+                }
+
+                NativeApi.GetCharacterPlacement(hdc, text, GCPFlags.GCP_GLYPHSHAPE, out var characterPlacement);
+
+                if (characterPlacement.Glyphs is null || characterPlacement.Glyphs.Length == 0)
+                {
+                    glyphIndex = 0;
+                    return false;
+                }
+
+                glyphIndex = characterPlacement.Glyphs[0];
+                return true;
+            }
+        }
+
         public static bool ExistsOutline(string fontFaceName, string text) => ExistsOutline(fontFaceName, text, out _);
 
         public static bool ExistsOutline(string fontFaceName, string text, out ushort glyphIndex)
