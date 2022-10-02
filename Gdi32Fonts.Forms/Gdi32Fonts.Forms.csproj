@@ -20,8 +20,4 @@
     <ProjectReference Include="..\Gdi32Fonts\Gdi32Fonts.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-
 </Project>

@@ -14,8 +14,4 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-  
 </Project>
