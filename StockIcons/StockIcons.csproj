@@ -2,17 +2,23 @@
 
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Authors>benutomo</Authors>
-    <Company />
-    <Product />
-    <Copyright>Copyright © 2020 benutomo</Copyright>
-    <Description>The StockIcons is utilities for useing icons of Shell32.dll.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageVersion>1.0.0</PackageVersion>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <!-- NuGet -->
+  <PropertyGroup>
+    <PackageId>Benutomo.StockIcons</PackageId>
+    <Description>The StockIcons is utilities for useing icons of Shell32.dll.</Description>
+    <PackageVersion>1.0.0-alpha1</PackageVersion>
+    <Authors>benutomo</Authors>
+    <Copyright>© benutomo.</Copyright>
+    <PackageTags>taskdialog</PackageTags>
+    <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

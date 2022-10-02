@@ -2,19 +2,27 @@
 
   <PropertyGroup>
     <TargetFrameworks>net46;net6.0-windows</TargetFrameworks>
-    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>WindowsControls.Aysnc.Forms</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Authors>benutomo</Authors>
-    <Company />
-    <Product />
-    <Copyright>Copyright © 2020 benutomo</Copyright>
-    <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageVersion>1.0.0</PackageVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+
     <AssemblyVersion>1.1.0.1</AssemblyVersion>
+  </PropertyGroup>
+
+  <!-- NuGet -->
+  <PropertyGroup>
+    <PackageVersion>1.0.0-alpha1</PackageVersion>
+
+    <PackageId>Benutomo.WindowsControls.Aysnc.Forms</PackageId>
+    <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
+    <Authors>benutomo</Authors>
+    <Copyright>© benutomo.</Copyright>
+    <PackageTags>taskdialog</PackageTags>
+    <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,17 +3,24 @@
   <PropertyGroup>
     <TargetFrameworks>net46;net6.0-windows</TargetFrameworks>
     <UseWindowsForms>True</UseWindowsForms>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Authors>benutomo</Authors>
-    <Company />
-    <Product />
-    <Copyright>Copyright © 2020 benutomo</Copyright>
-    <Description>The Gdi32Fonts.Forms is a option module for WindowsForms of Gdi32Fonts.</Description>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageVersion>1.0.0</PackageVersion>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <!-- NuGet -->
+  <PropertyGroup>
+    <PackageVersion>1.0.0-alpha1</PackageVersion>
+
+    <PackageId>Benutomo.Gdi32Fonts.Forms</PackageId>
+    <Description>The Gdi32Fonts.Forms is a option module for WindowsForms of Gdi32Fonts.</Description>
+    <Authors>benutomo</Authors>
+    <Copyright>© benutomo.</Copyright>
+    <PackageTags>taskdialog</PackageTags>
+    <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
