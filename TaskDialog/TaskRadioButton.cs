@@ -8,7 +8,7 @@ namespace WindowsControls
 {
     public class TaskRadioButton
     {
-		public event EventHandler<TaskDialogEventArgs> Click;
+		public event EventHandler<TaskDialogEventArgs>? Click;
 
         public ulong GlobalId { get; }
 

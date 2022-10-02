@@ -8,7 +8,7 @@ namespace WindowsControls
 {
     public class TaskButton
     {
-        public event EventHandler<TaskButtonClickEventArgs> Click;
+        public event EventHandler<TaskButtonClickEventArgs>? Click;
 
         public static readonly ulong GlobalIdStart = 0x1000;
 

@@ -237,7 +237,7 @@ namespace WindowsControls
         public IntPtr hFooterIcon;
         public IntPtr pszFooter;
         [MarshalAs(UnmanagedType.FunctionPtr)]
-        public TaskDialogCallbackProc pfCallback;
+        public TaskDialogCallbackProc? pfCallback;
         public IntPtr lpCallbackData;
         public uint cxWidth;
     };

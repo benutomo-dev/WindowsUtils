@@ -10,21 +10,21 @@ namespace WindowsControls
 {
     public class TaskDialog
     {
-        public event EventHandler<TaskDialogEventArgs> DialogConstructed;
+        public event EventHandler<TaskDialogEventArgs>? DialogConstructed;
 
-        public event EventHandler<TaskDialogEventArgs> Navigated;
+        public event EventHandler<TaskDialogEventArgs>? Navigated;
 
-        public event EventHandler<TaskDialogEventArgs> Destroyed;
+        public event EventHandler<TaskDialogEventArgs>? Destroyed;
 
-        public event EventHandler<TaskDialogEventArgs> Created;
+        public event EventHandler<TaskDialogEventArgs>? Created;
 
-        public TaskRadioButton SelectedRadioButton { get; private set; }
+        public TaskRadioButton? SelectedRadioButton { get; private set; }
 
-        public TaskButton ClickedButton { get; private set; }
+        public TaskButton? ClickedButton { get; private set; }
 
         public bool VerificationFlagChecked { get; private set; }
 
-        public TaskDialogPage PreviousPage { get; internal set; }
+        public TaskDialogPage? PreviousPage { get; internal set; }
         public TaskDialogPage CurrentPage { get; internal set; }
 
         public TaskDialog(TaskDialogPage taskDialogPage)

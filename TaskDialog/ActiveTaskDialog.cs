@@ -33,7 +33,7 @@ namespace WindowsControls
 
         public IntPtr OwnerHandle { get; private set; }
 
-        private List<Exception> internalExceptions;
+        private List<Exception>? internalExceptions;
 
         private TaskDialogProgressBarType CurrentProgressBarType;
 
@@ -167,7 +167,7 @@ namespace WindowsControls
                         return 0;
                     case TaskDialogNotification.TDN_NAVIGATED:
                         TaskDialog.OnNavigated(this);
-                        TaskDialog.PreviousPage.OnUnload(this);
+                        TaskDialog.PreviousPage?.OnUnload(this);
                         TaskDialog.CurrentPage.OnLoad(this);
                         return 0;
                     case TaskDialogNotification.TDN_VERIFICATION_CLICKED:
