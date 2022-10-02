@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net45;net5.0-windows</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
+    <TargetFrameworks>net46;net6.0-windows</TargetFrameworks>
     <UseWindowsForms>True</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -15,7 +14,7 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   
