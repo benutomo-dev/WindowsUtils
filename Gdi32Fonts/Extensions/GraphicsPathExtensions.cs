@@ -1,12 +1,4 @@
 ﻿using Gdi32Fonts;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Drawing.Drawing2D
 {

@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsControls;
@@ -12,9 +6,7 @@ using WindowsControls.Aysnc;
 using WindowsControls.Aysnc.Forms;
 
 using TaskDialog = WindowsControls.TaskDialog;
-using TaskDialogIcon = WindowsControls.TaskDialogIcon;
 using TaskDialogPage = WindowsControls.TaskDialogPage;
-using TaskDialogProgressBarState = WindowsControls.TaskDialogProgressBarState;
 
 namespace AsyncHelperSample
 {

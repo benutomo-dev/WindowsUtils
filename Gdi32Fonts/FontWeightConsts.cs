@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Gdi32Fonts
+﻿namespace Gdi32Fonts
 {
     public static class FontWeightConsts
     {
