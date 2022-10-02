@@ -15,7 +15,7 @@
     <Description>The Gdi32Fonts.Forms is a option module for WindowsForms of Gdi32Fonts.</Description>
     <Authors>benutomo</Authors>
     <Copyright>© benutomo.</Copyright>
-    <PackageTags>taskdialog</PackageTags>
+    <PackageTags>gdi;font</PackageTags>
     <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

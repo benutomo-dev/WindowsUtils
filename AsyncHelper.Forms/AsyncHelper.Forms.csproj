@@ -17,7 +17,7 @@
     <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
     <Authors>benutomo</Authors>
     <Copyright>© benutomo.</Copyright>
-    <PackageTags>taskdialog</PackageTags>
+    <PackageTags>async</PackageTags>
     <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

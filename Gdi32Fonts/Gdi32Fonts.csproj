@@ -14,7 +14,7 @@
     <Description>The Gdi32Fonts is utilities for font on gdi32.</Description>
     <Authors>benutomo</Authors>
     <Copyright>© benutomo.</Copyright>
-    <PackageTags>taskdialog</PackageTags>
+    <PackageTags>gdi;font</PackageTags>
     <PackageProjectUrl>https://github.com/benutomo-dev/WindowsUtils</PackageProjectUrl>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
