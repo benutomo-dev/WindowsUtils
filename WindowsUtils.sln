@@ -1,23 +1,29 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30320.27
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskDialog", "TaskDialog\TaskDialog.csproj", "{538DB590-B474-45F2-B752-1E200538B4EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskDialogSample", "TaskDialogSample\TaskDialogSample.csproj", "{79433054-0529-4B6F-8B62-363001DAE5F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskDialogSample", "TaskDialogSample\TaskDialogSample.csproj", "{79433054-0529-4B6F-8B62-363001DAE5F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockIcons", "StockIcons\StockIcons.csproj", "{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StockIcons", "StockIcons\StockIcons.csproj", "{FCA891B2-5C60-4D04-9E4B-9B717C5E6025}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectInfos", "ProjectInfos", "{3A1BE056-B116-4DF7-B25F-8B31553E1D23}"
 	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		Directory.build.props = Directory.build.props
+		Directory.build.props.user = Directory.build.props.user
+		Directory.build.targets = Directory.build.targets
+		Directory.build.targets.user = Directory.build.targets.user
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncHelper", "AsyncHelper\AsyncHelper.csproj", "{99F8047C-9D1B-4310-BF7A-A976DB2F0B47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncHelperSample", "AsyncHelperSample\AsyncHelperSample.csproj", "{5D348716-C767-4874-8750-970B1A974AB2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncHelperSample", "AsyncHelperSample\AsyncHelperSample.csproj", "{5D348716-C767-4874-8750-970B1A974AB2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{91690D82-AFF5-4CC3-9927-24359E3E1EDA} = {91690D82-AFF5-4CC3-9927-24359E3E1EDA}
 	EndProjectSection
