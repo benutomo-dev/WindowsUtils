@@ -14,13 +14,13 @@ namespace WindowsControls
 
         private GCHandle radioButtonsHandle;
 
-        private Dictionary<ulong, int> idTable;
+        private Dictionary<ulong, int>? idTable;
 
-        private TaskButton defaultButton;
+        private TaskButton? defaultButton;
 
-        private TaskRadioButton defaultRadioButton;
+        private TaskRadioButton? defaultRadioButton;
 
-        internal ActiveTaskDialog activeTaskDialog;
+        internal ActiveTaskDialog? activeTaskDialog;
 
         internal TASKDIALOGCONFIG nativeTaskDialog;
 
@@ -28,19 +28,19 @@ namespace WindowsControls
 
         internal Dictionary<int, TaskRadioButton> clrRadioButtons;
 
-        public event EventHandler<TaskDialogTimerEventArgs> Timer;
+        public event EventHandler<TaskDialogTimerEventArgs>? Timer;
 
-        public event EventHandler<TaskDialogEventArgs> Help;
+        public event EventHandler<TaskDialogEventArgs>? Help;
 
-        public event EventHandler<TaskDialogVerificationEventArgs> VerificationClicked;
+        public event EventHandler<TaskDialogVerificationEventArgs>? VerificationClicked;
 
-        public event EventHandler<TaskDialogExpandButtonEventArgs> ExpandoButtonClicked;
+        public event EventHandler<TaskDialogExpandButtonEventArgs>? ExpandoButtonClicked;
 
-        public event EventHandler<TaskDialogHyperlinkEventArgs> HyperlinkClicked;
+        public event EventHandler<TaskDialogHyperlinkEventArgs>? HyperlinkClicked;
 
-        public event EventHandler<TaskDialogEventArgs> Load;
+        public event EventHandler<TaskDialogEventArgs>? Load;
 
-        public event EventHandler<TaskDialogEventArgs> UnLoad;
+        public event EventHandler<TaskDialogEventArgs>? UnLoad;
 
         public TaskDialogFallbackIcon ShieldBlueFallbackIcon { get; set; }
         public TaskDialogFallbackIcon SecurityWarningFallbackIcon { get; set; }
@@ -49,15 +49,24 @@ namespace WindowsControls
         public TaskDialogFallbackIcon ShieldGrayFallbackIcon { get; set; }
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public IntPtr Handle => activeTaskDialog.Handle;
+        public IntPtr Handle => activeTaskDialog?.Handle ?? throw new InvalidOperationException($"{nameof(Handle)}プロパティを{nameof(TaskDialogPage)}が表示されていない間に参照することはできません。");
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public IntPtr OwnerHandle => activeTaskDialog.OwnerHandle;
+        public IntPtr OwnerHandle => activeTaskDialog?.OwnerHandle ?? throw new InvalidOperationException($"{nameof(OwnerHandle)}プロパティを{nameof(TaskDialogPage)}が表示されていない間に参照することはできません。");
 
         public TaskDialogIcon FooterIcon { get; set; }
 
         public TaskDialogIcon MainIcon { get; set; }
-        
+
+        public TaskButton? DefaultButton => defaultButton;
+
+        public TaskRadioButton? DefaultRadioButton => defaultRadioButton;
+
+        public ImmutableArray<TaskButton> Buttons { get; private set; } = ImmutableArray<TaskButton>.Empty;
+
+        public ImmutableArray<TaskRadioButton> RadioButtons { get; private set; } = ImmutableArray<TaskRadioButton>.Empty;
+
+
         public string FooterText
         {
             get
@@ -481,20 +490,23 @@ namespace WindowsControls
                 throw new InvalidOperationException(Resource.AlreadyShowing);
             }
 
+            clrButtons.Clear();
             if (buttons == null || buttons.Length == 0)
             {
                 if (buttonsHandle.IsAllocated) buttonsHandle.Free();
                 nativeTaskDialog.pButtons = IntPtr.Zero;
                 nativeTaskDialog.cButtons = 0;
 
-                clrButtons = new Dictionary<int, TaskButton>();
+                Buttons = ImmutableArray<TaskButton>.Empty;
 
                 return;
             }
 
-            clrButtons = buttons
-                            .Select((v, i) => new { Button = v, Id = v.GlobalId >= TaskButton.GlobalIdStart ? i + 0x1000 : (int)v.GlobalId })
-                            .ToDictionary(v => v.Id, v => v.Button);
+            foreach (var iter in buttons.Select((v, i) => (button: v, id: v.GlobalId >= TaskButton.GlobalIdStart ? i + 0x1000 : (int)v.GlobalId)))
+            {
+                clrButtons.Add(iter.id, iter.button);
+            }
+            Buttons = buttons.ToImmutableArray();
 
             TASKDIALOG_BUTTON[] nativeButtons = clrButtons
                                                 .Select(v => new TASKDIALOG_BUTTON
@@ -528,20 +540,24 @@ namespace WindowsControls
                 throw new InvalidOperationException(Resource.AlreadyShowing);
             }
 
+            clrRadioButtons.Clear();
+
             if (radioButtons == null || radioButtons.Length == 0)
             {
                 if (radioButtonsHandle.IsAllocated) radioButtonsHandle.Free();
                 nativeTaskDialog.pRadioButtons = IntPtr.Zero;
                 nativeTaskDialog.cRadioButtons = 0;
 
-                clrRadioButtons = new Dictionary<int, TaskRadioButton>();
+                RadioButtons = ImmutableArray<TaskRadioButton>.Empty;
 
                 return;
             }
 
-            clrRadioButtons = radioButtons
-                            .Select((v, i) => new { Button = v, Id = v.GlobalId >= TaskButton.GlobalIdStart ? i + 0x2000 : (int)v.GlobalId })
-                            .ToDictionary(v => v.Id, v => v.Button);
+            foreach (var iter in radioButtons.Select((v, i) => (button: v, id: v.GlobalId >= TaskButton.GlobalIdStart ? i + 0x2000 : (int)v.GlobalId)))
+            {
+                clrRadioButtons.Add(iter.id, iter.button);
+            }
+            RadioButtons = radioButtons.ToImmutableArray();
 
             TASKDIALOG_BUTTON[] nativeButtons = clrRadioButtons
                                                 .Select(v => new TASKDIALOG_BUTTON
@@ -579,7 +595,7 @@ namespace WindowsControls
 
         internal int ToId(ulong globalId)
         {
-            if (idTable.TryGetValue(globalId, out int id))
+            if (idTable is not null && idTable.TryGetValue(globalId, out int id))
             {
                 return id;
             }
