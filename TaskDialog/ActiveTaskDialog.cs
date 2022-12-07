@@ -9,6 +9,8 @@ namespace WindowsControls
         internal static readonly OSVERSIONINFOEX OsVersionInfo;
         internal static readonly DLLVERSIONINFO DllVersionInfo;
 
+        static readonly IntPtr InvalidHandle = IntPtr.Size == sizeof(int) ? new IntPtr(-1) : new IntPtr(-1L);
+
         static ActiveTaskDialog()
         {
             OsVersionInfo.dwOSVersionInfoSize = (uint)Marshal.SizeOf(OsVersionInfo);
@@ -25,13 +27,25 @@ namespace WindowsControls
 
         private TaskDialog TaskDialog { get; }
 
-        public IntPtr Handle { get; private set; }
+        public IntPtr Handle
+        {
+            get
+            {
+                var handle = _handle;
+                if (handle == IntPtr.Zero) throw new InvalidOperationException("Not yet created.");
+                if (handle == InvalidHandle) throw new InvalidOperationException("Already destroyed.");
+
+                return handle;
+            }
+        }
 
         public IntPtr OwnerHandle { get; private set; }
 
         private List<Exception>? internalExceptions;
 
         private TaskDialogProgressBarType CurrentProgressBarType;
+
+        private IntPtr _handle = IntPtr.Zero;
 
         private ActiveTaskDialog(TaskDialog taskDialog)
         {
@@ -134,18 +148,19 @@ namespace WindowsControls
                         TaskDialog.CurrentPage.OnRadioButtonClickedInternal(this, wParam.ToInt32());
                         return 0;
                     case TaskDialogNotification.TDN_CREATED:
-                        if (this.Handle == IntPtr.Zero)
+                        if (this._handle == IntPtr.Zero)
                         {
-                            this.Handle = hwnd;
+                            this._handle = hwnd;
                             TaskDialog.CurrentPage.OnLoad(this);
                         }
                         else
                         {
-                            this.Handle = hwnd;
+                            this._handle = hwnd;
                         }
                         TaskDialog.OnCreated(this);
                         return 0;
                     case TaskDialogNotification.TDN_DESTROYED:
+                        this._handle = InvalidHandle;
                         TaskDialog.CurrentPage.OnUnload(this);
                         TaskDialog.OnDestroyed(this);
                         return 0;
