@@ -31,6 +31,7 @@ namespace WindowsControls.Aysnc.Forms
                 {
                     do
                     {
+                        Windows.Win32.PInvoke.WaitMessage();
                         Application.DoEvents();
                     }
                     while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
@@ -43,6 +44,7 @@ namespace WindowsControls.Aysnc.Forms
                     {
                         do
                         {
+                            Windows.Win32.PInvoke.WaitMessage();
                             Application.DoEvents();
                         }
                         while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
@@ -255,6 +257,7 @@ namespace WindowsControls.Aysnc.Forms
                     {
                         do
                         {
+                            Windows.Win32.PInvoke.WaitMessage();
                             Application.DoEvents();
                         }
                         while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
@@ -267,6 +270,7 @@ namespace WindowsControls.Aysnc.Forms
                         {
                             do
                             {
+                                Windows.Win32.PInvoke.WaitMessage();
                                 Application.DoEvents();
                             }
                             while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
@@ -339,6 +343,7 @@ namespace WindowsControls.Aysnc.Forms
                 {
                     do
                     {
+                        Windows.Win32.PInvoke.WaitMessage();
                         Application.DoEvents();
                     }
                     while (!task.IsCompleted);
@@ -364,6 +369,7 @@ namespace WindowsControls.Aysnc.Forms
                 {
                     do
                     {
+                        Windows.Win32.PInvoke.WaitMessage();
                         Application.DoEvents();
                     }
                     while (!valueTask.IsCompleted);
