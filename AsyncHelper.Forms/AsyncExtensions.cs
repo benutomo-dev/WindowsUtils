@@ -4,6 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.Win32.Foundation;
+using static Windows.Win32.PInvoke;
 
 namespace WindowsControls.Aysnc.Forms
 {
@@ -29,12 +31,17 @@ namespace WindowsControls.Aysnc.Forms
 
                 if (currentExecutionContext is null)
                 {
-                    do
+                    task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+
+                    while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                     {
-                        Windows.Win32.PInvoke.WaitMessage();
                         Application.DoEvents();
+
+                        if (!task.IsCompleted)
+                        {
+                            WaitMessage();
+                        }
                     }
-                    while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
                 }
                 else
                 {
@@ -42,12 +49,17 @@ namespace WindowsControls.Aysnc.Forms
                     // ExecutionContext.Run内で実行して、実行元のExecutionContextを保護する
                     ExecutionContext.Run(currentExecutionContext, _ =>
                     {
-                        do
+                        task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+
+                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                         {
-                            Windows.Win32.PInvoke.WaitMessage();
                             Application.DoEvents();
+
+                            if (!task.IsCompleted)
+                            {
+                                WaitMessage();
+                            }
                         }
-                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
                     }, null);
                 }
 
@@ -255,12 +267,17 @@ namespace WindowsControls.Aysnc.Forms
 
                     if (currentExecutionContext is null)
                     {
-                        do
+                        task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+
+                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                         {
-                            Windows.Win32.PInvoke.WaitMessage();
                             Application.DoEvents();
+
+                            if (!task.IsCompleted)
+                            {
+                                WaitMessage();
+                            }
                         }
-                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
                     }
                     else
                     {
@@ -268,12 +285,17 @@ namespace WindowsControls.Aysnc.Forms
                         // ExecutionContext.Run内で実行して、実行元のExecutionContextを保護する
                         ExecutionContext.Run(currentExecutionContext, _ =>
                         {
-                            do
+                            task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+
+                            while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                             {
-                                Windows.Win32.PInvoke.WaitMessage();
                                 Application.DoEvents();
+
+                                if (!task.IsCompleted)
+                                {
+                                    WaitMessage();
+                                }
                             }
-                            while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout));
                         }, null);
                     }
 
@@ -341,12 +363,17 @@ namespace WindowsControls.Aysnc.Forms
 
                 using (modalExecutionBlock.Enter())
                 {
-                    do
+                    task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+
+                    while (!task.IsCompleted)
                     {
-                        Windows.Win32.PInvoke.WaitMessage();
                         Application.DoEvents();
+
+                        if (!task.IsCompleted)
+                        {
+                            WaitMessage();
+                        }
                     }
-                    while (!task.IsCompleted);
                 }
             }
 
@@ -361,22 +388,7 @@ namespace WindowsControls.Aysnc.Forms
                 return valueTask.Result;
             }
 
-            if (Application.MessageLoop)
-            {
-                modalExecutionBlock ??= ModalExecutionBlock.Default;
-
-                using (modalExecutionBlock.Enter())
-                {
-                    do
-                    {
-                        Windows.Win32.PInvoke.WaitMessage();
-                        Application.DoEvents();
-                    }
-                    while (!valueTask.IsCompleted);
-                }
-            }
-
-            return valueTask.Result;
+            return GetResultWhileDoingMessageLoopEvents(valueTask.AsTask(), modalExecutionBlock);
         }
     }
 }

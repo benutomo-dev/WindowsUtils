@@ -11,7 +11,7 @@
 
   <!-- NuGet -->
   <PropertyGroup>
-    <PackageVersion>1.0.0-alpha6</PackageVersion>
+    <PackageVersion>1.0.0-alpha7</PackageVersion>
 
     <PackageId>Benutomo.WindowsControls.Aysnc.Forms</PackageId>
     <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>

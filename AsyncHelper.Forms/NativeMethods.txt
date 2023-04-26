@@ -1,1 +1,3 @@
 WaitMessage
+PostMessage
+WM_NULL
