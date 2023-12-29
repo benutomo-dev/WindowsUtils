@@ -11,6 +11,10 @@ namespace WindowsControls.Aysnc.Forms
 {
     public static class AsyncExtensions
     {
+
+        [ThreadStatic]
+        static Control? _windowHandleProviderControl;
+
         /// <summary>
         /// 現在のスレッドのメッセージループで<paramref name="task"/>を待機する。現在のスレッドにメッセージループが存在しない場合は、<see cref="Task.Wait(int)"/>で待機する。
         /// </summary>
@@ -27,11 +31,25 @@ namespace WindowsControls.Aysnc.Forms
             var timer = Stopwatch.StartNew();
             if (Application.MessageLoop)
             {
+                if (_windowHandleProviderControl is null)
+                {
+                    _windowHandleProviderControl = new Control();
+                    _windowHandleProviderControl.CreateControl();
+
+                    _windowHandleProviderControl.Disposed += (_, _) => Debug.WriteLine($"{nameof(_windowHandleProviderControl)}.Disposed");
+                    _windowHandleProviderControl.HandleDestroyed += (destroyed, _) =>
+                    {
+                        Debug.Assert(ReferenceEquals(_windowHandleProviderControl, destroyed));
+                        _windowHandleProviderControl = null;
+                        Debug.WriteLine($"{nameof(_windowHandleProviderControl)}.HandleDestroyed");
+                    };
+                }
+
                 var currentExecutionContext = ExecutionContext.Capture();
 
                 if (currentExecutionContext is null)
                 {
-                    task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+                    task.ContinueWith((_, _handle) => PostMessage(new HWND((IntPtr)_handle!), WM_NULL, new WPARAM(), new LPARAM()), _windowHandleProviderControl.Handle);
 
                     while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                     {
@@ -49,7 +67,7 @@ namespace WindowsControls.Aysnc.Forms
                     // ExecutionContext.Run内で実行して、実行元のExecutionContextを保護する
                     ExecutionContext.Run(currentExecutionContext, _ =>
                     {
-                        task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
+                        task.ContinueWith((_, _handle) => PostMessage(new HWND((IntPtr)_handle!), WM_NULL, new WPARAM(), new LPARAM()), _windowHandleProviderControl.Handle);
 
                         while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
                         {
@@ -245,150 +263,6 @@ namespace WindowsControls.Aysnc.Forms
             {
                 return asyncTaskCallback().GetResultOnMassageLoop();
             }
-        }
-
-
-        [Obsolete("ModalExecutionBlock.Default.WaitTaskOnMessageLoop(task, [millisecondsTimeout]) の形に置き換える")]
-        public static bool WaitWhileDoingMessageLoopEvents(this Task task, int millisecondsTimeout = -1, ModalExecutionBlock? modalExecutionBlock = null)
-        {
-            if (task.IsCompleted)
-            {
-                return true;
-            }
-
-            var timer = Stopwatch.StartNew();
-            if (Application.MessageLoop)
-            {
-                modalExecutionBlock ??= ModalExecutionBlock.Default;
-
-                using (modalExecutionBlock.Enter())
-                {
-                    var currentExecutionContext = ExecutionContext.Capture();
-
-                    if (currentExecutionContext is null)
-                    {
-                        task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
-
-                        while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
-                        {
-                            Application.DoEvents();
-
-                            if (!task.IsCompleted)
-                            {
-                                WaitMessage();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Application.DoEvents()を実行するとExecutionContextが消失するため、
-                        // ExecutionContext.Run内で実行して、実行元のExecutionContextを保護する
-                        ExecutionContext.Run(currentExecutionContext, _ =>
-                        {
-                            task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
-
-                            while (!task.IsCompleted && (millisecondsTimeout == -1 || timer.ElapsedMilliseconds < millisecondsTimeout))
-                            {
-                                Application.DoEvents();
-
-                                if (!task.IsCompleted)
-                                {
-                                    WaitMessage();
-                                }
-                            }
-                        }, null);
-                    }
-
-                    if (task.IsCanceled || task.IsFaulted)
-                    {
-                        task.Wait();
-                    }
-
-                    return task.IsCompleted;
-                }
-            }
-            else
-            {
-                return task.Wait(millisecondsTimeout);
-            }
-        }
-
-        [Obsolete("ModalExecutionBlock.Default.WaitTaskOnMessageLoop(valueTask, [millisecondsTimeout]) の形に置き換える")]
-        public static bool WaitWhileDoingMessageLoopEvents(this in ValueTask valueTask, int millisecondsTimeout = -1, ModalExecutionBlock? modalExecutionBlock = null)
-        {
-            if (valueTask.IsCompleted)
-            {
-                return true;
-            }
-
-            return valueTask.AsTask().WaitWhileDoingMessageLoopEvents(millisecondsTimeout, modalExecutionBlock);
-        }
-
-        [Obsolete("ModalExecutionBlock.Default.WaitTaskOnMessageLoop(valueTask, [millisecondsTimeout]) の形に置き換える")]
-        public static bool WaitWhileDoingMessageLoopEvents<T>(this in ValueTask<T> valueTask, out T result, int millisecondsTimeout = -1, ModalExecutionBlock? modalExecutionBlock = null)
-        {
-            if (valueTask.IsCompleted)
-            {
-                result = valueTask.Result;
-                return true;
-            }
-
-            var task = valueTask.AsTask();
-
-            task.WaitWhileDoingMessageLoopEvents(millisecondsTimeout, modalExecutionBlock);
-
-            if (task.IsCompleted)
-            {
-                result = task.Result;
-                return true;
-            }
-            else
-            {
-                result = default!;
-                return false;
-            }
-        }
-
-        [Obsolete("ModalExecutionBlock.Default.GetResultOnMessageLoop(task, [millisecondsTimeout]) の形に置き換える")]
-        public static T GetResultWhileDoingMessageLoopEvents<T>(this Task<T> task, ModalExecutionBlock? modalExecutionBlock = null)
-        {
-            if (task.IsCompleted)
-            {
-                return task.Result;
-            }
-
-            if (Application.MessageLoop)
-            {
-                modalExecutionBlock ??= ModalExecutionBlock.Default;
-
-                using (modalExecutionBlock.Enter())
-                {
-                    task.ContinueWith(_ => PostMessage(new HWND(Process.GetCurrentProcess().MainWindowHandle), WM_NULL, new WPARAM(), new LPARAM()));
-
-                    while (!task.IsCompleted)
-                    {
-                        Application.DoEvents();
-
-                        if (!task.IsCompleted)
-                        {
-                            WaitMessage();
-                        }
-                    }
-                }
-            }
-
-            return task.Result;
-        }
-
-        [Obsolete("ModalExecutionBlock.Default.GetResultOnMessageLoop(valueTask, [millisecondsTimeout]) の形に置き換える")]
-        public static T GetResultWhileDoingMessageLoopEvents<T>(this in ValueTask<T> valueTask, ModalExecutionBlock? modalExecutionBlock = null)
-        {
-            if (valueTask.IsCompleted)
-            {
-                return valueTask.Result;
-            }
-
-            return GetResultWhileDoingMessageLoopEvents(valueTask.AsTask(), modalExecutionBlock);
         }
     }
 }

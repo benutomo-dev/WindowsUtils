@@ -6,12 +6,12 @@
 
     <UseWindowsForms>true</UseWindowsForms>
 
-    <AssemblyVersion>1.2.0.2</AssemblyVersion>
+    <AssemblyVersion>1.2.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <!-- NuGet -->
   <PropertyGroup>
-    <PackageVersion>1.0.0-alpha7</PackageVersion>
+    <PackageVersion>1.0.0-alpha8</PackageVersion>
 
     <PackageId>Benutomo.WindowsControls.Aysnc.Forms</PackageId>
     <Description>The AsyncHelper.Forms is a option module for WindowsForms of AsyncHelper.</Description>
