@@ -9,7 +9,7 @@
 
   <!-- NuGet -->
   <PropertyGroup>
-    <PackageVersion>1.0.0-alpha1</PackageVersion>
+    <PackageVersion>1.0.0</PackageVersion>
 
     <PackageId>Benutomo.Gdi32Fonts.Forms</PackageId>
     <Description>The Gdi32Fonts.Forms is a option module for WindowsForms of Gdi32Fonts.</Description>
